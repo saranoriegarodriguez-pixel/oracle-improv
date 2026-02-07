@@ -1,0 +1,443 @@
+/* src/pages/Profile.css */
+
+.profile{
+  padding: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Panel */
+.profile__panel{
+  width: min(980px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(0,0,0,.18);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+
+  transform: translateY(6px);
+  opacity: 0;
+  animation: profileIn .22s ease-out forwards;
+  will-change: transform, opacity;
+
+  transition: border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+
+@keyframes profileIn{
+  to{ transform: translateY(0); opacity: 1; }
+}
+
+/* Hover panel (mantiene el efecto) */
+.profile__panel:hover{
+  border-color: rgba(255,61,166,.18);
+  box-shadow:
+    var(--shadow),
+    0 0 0 3px rgba(255,61,166,.08);
+}
+
+/* -------------------------
+   Header
+------------------------- */
+.profile__header{
+  margin-bottom: 10px;
+}
+
+.profile__kicker{
+  font-size: 14px;
+  opacity: .72;
+  color: var(--text2);
+}
+
+.profile__subtitle{
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: .70;
+  color: var(--muted);
+}
+
+.profile__name{
+  font-size: 42px;
+  line-height: 1.05;
+  font-weight: 950;
+  margin: 10px 0 14px;
+  letter-spacing: -0.6px;
+  color: var(--text);
+  text-shadow: 0 0 28px rgba(255,61,166,.08);
+}
+
+/* -------------------------
+   Levels (compacto)
+------------------------- */
+.profile__levels{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.profile__levelBox{
+  width: min(560px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.03);
+
+  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+
+.profile__levelBox:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.16);
+  background: rgba(255,255,255,.04);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,.35),
+    inset 0 0 0 1px rgba(0,0,0,.28);
+}
+
+/* Row: badges left, % right */
+.profile__levelRow{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Recommended + Selected columns */
+.profile__levelCols{
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.profile__levelCol{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.profile__miniLabel{
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text2);
+  opacity: .78;
+}
+
+/* Badges */
+.profile__badge{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,244,222,.92);
+
+  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+
+.profile__badge:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.08);
+  box-shadow: 0 0 0 3px rgba(255,61,166,.06);
+}
+
+.profile__badge--gold{
+  border-color: rgba(214,178,94,.45);
+  background: rgba(214,178,94,.12);
+}
+
+.profile__badge--accent{
+  border-color: rgba(255,61,166,.45);
+  background: rgba(255,61,166,.14);
+}
+
+.profile__levelPct{
+  font-weight: 950;
+  color: var(--text2);
+  opacity: .9;
+  white-space: nowrap;
+}
+
+/* -------------------------
+   Sections
+------------------------- */
+.profile__sectionTitle{
+  margin: 12px 0 10px;
+  font-size: 13px;
+  font-weight: 900;
+  opacity: .92;
+  color: var(--text);
+  position: relative;
+}
+
+.profile__sectionTitle::after{
+  content:"";
+  display:block;
+  height: 2px;
+  width: 82px;
+  margin-top: 8px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), rgba(240,213,138,.55));
+  opacity: .55;
+}
+
+/* -------------------------
+   Oracle tips block
+------------------------- */
+.profile__oracle{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+
+  transition: border-color .14s ease, background .14s ease, box-shadow .14s ease, transform .14s ease;
+}
+
+.profile__oracle:hover{
+  transform: translateY(-1px);
+  border-color: rgba(240,213,138,.18);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,.35),
+    0 0 0 3px rgba(240,213,138,.08);
+}
+
+.profile__oracleRec{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(240,213,138,.18);
+  background: rgba(240,213,138,.08);
+  color: var(--text);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.profile__oracleList{
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.profile__oraclePenalty{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,77,109,.22);
+  background: rgba(255,77,109,.10);
+  color: rgba(255,210,220,.92);
+  font-size: 12px;
+}
+
+.profile__muted{
+  font-size: 12px;
+  opacity: .72;
+  color: var(--muted);
+}
+
+/* -------------------------
+   Skills grid
+------------------------- */
+.profile__skills{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 760px){
+  .profile__skills{ grid-template-columns: 1fr; }
+  .profile__levelRow{ align-items: flex-start; }
+}
+
+.profile__skill{
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.02);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.28);
+
+  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+
+.profile__skill:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,61,166,.18);
+  background: rgba(255,255,255,.03);
+  box-shadow:
+    0 16px 44px rgba(0,0,0,.38),
+    0 0 0 3px rgba(255,61,166,.08),
+    inset 0 0 0 1px rgba(0,0,0,.30);
+}
+
+.profile__skillTop{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.profile__skillName{
+  font-size: 13px;
+  font-weight: 850;
+  opacity: .95;
+  color: var(--text);
+  min-width: 0;
+}
+
+.profile__skillPct{
+  font-size: 12px;
+  opacity: .75;
+  color: var(--text2);
+}
+
+.profile__bar{
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.24);
+}
+
+.profile__barFill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,61,166,.92), rgba(255,102,189,.82), rgba(240,213,138,.45));
+  box-shadow: 0 0 18px rgba(255,61,166,.10);
+
+  transition: width .55s cubic-bezier(.22,.8,.22,1), filter .14s ease, box-shadow .14s ease;
+  will-change: width;
+}
+
+.profile__barFill.is-bump{
+  filter: brightness(1.12);
+  box-shadow: 0 0 18px rgba(255,61,166,.14);
+}
+
+/* Improved skill (si lo vuelves a usar luego) */
+.profile__skill.is-improved{
+  border-color: rgba(240,213,138,.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.35),
+    0 0 0 3px rgba(240,213,138,.10);
+}
+
+/* -------------------------
+   Master mode (mantiene look)
+------------------------- */
+.profile--master .profile__panel{
+  border-color: rgba(255,77,109,.28);
+  background:
+    radial-gradient(900px 520px at 12% 0%, rgba(255,61,166,.22), transparent 60%),
+    radial-gradient(900px 520px at 92% 10%, rgba(255,77,109,.16), transparent 60%),
+    rgba(0,0,0,.24);
+  box-shadow:
+    var(--shadow),
+    0 0 0 3px rgba(255,77,109,.10);
+}
+
+.profile--master .profile__barFill{
+  background: linear-gradient(90deg, rgba(255,77,109,.95), rgba(255,61,166,.92), rgba(240,213,138,.55));
+  box-shadow: 0 0 18px rgba(255,77,109,.18);
+}
+
+.profile--master .profile__sectionTitle::after{
+  background: linear-gradient(90deg, rgba(255,77,109,.85), var(--accent), rgba(240,213,138,.55));
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .profile__panel{ animation: none; transform:none; opacity: 1; }
+  .profile__skill,
+  .profile__levelBox,
+  .profile__badge,
+  .profile__barFill{ transition: none !important; }
+}/* -------------------------
+   Budget (OpenAI)
+------------------------- */
+
+.profile__budgetBar{
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.24);
+}
+
+.profile__budgetFill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,61,166,.92),
+    rgba(255,102,189,.82),
+    rgba(240,213,138,.45)
+  );
+  box-shadow: 0 0 18px rgba(255,61,166,.12);
+  transition: width 240ms ease, filter .14s ease, box-shadow .14s ease;
+  will-change: width;
+}
+
+.profile__budgetFill.is-over{
+  filter: brightness(1.08) saturate(1.05);
+  box-shadow: 0 0 22px rgba(255,61,166,.16);
+}
+
+/* -------------------------
+   Buttons (soft)
+   Usado en Profile: "Actualizar"
+------------------------- */
+
+.btn{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.btn:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.btn--soft{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 12px;
+  font-weight: 900;
+  letter-spacing: .01em;
+  cursor: pointer;
+  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+
+.btn--soft:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,61,166,.22);
+  background: rgba(255,61,166,.08);
+  box-shadow: 0 0 0 3px rgba(255,61,166,.08);
+}
+
+.btn--soft:active{
+  transform: translateY(0);
+}
+
+.btn--soft:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(255,61,166,.12),
+    0 0 0 1px rgba(255,61,166,.22) inset;
+}

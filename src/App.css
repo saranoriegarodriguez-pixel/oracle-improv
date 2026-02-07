@@ -1,0 +1,13 @@
+/* src/App.css */
+/* App = layout global. NO variables aquí. */
+
+#root{
+  background: transparent;
+  color: inherit;
+}
+
+/* Si alguna página mete fondos blancos por defecto */
+main, section, article, .page{
+  color: inherit;
+}
+

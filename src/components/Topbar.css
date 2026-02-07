@@ -1,0 +1,106 @@
+/* src/components/Topbar.css */
+
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 12px 12px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  background: rgba(10,10,14,.55);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar__inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar__spacer{ flex: 1; }
+
+/* ✅ Icon buttons (🌐 🏠 👤 ⚙) */
+.topbar__iconBtn{
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.22);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .08s ease, border-color .12s ease, background .12s ease;
+}
+
+.topbar__iconBtn:hover{
+  border-color: rgba(255,61,166,.35);
+  transform: translateY(-1px);
+}
+
+.topbar__iconBtn:disabled{
+  opacity: .55;
+  cursor: default;
+  transform: none;
+}
+
+.topbar__icon{
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Perfil y Ajustes: toque distinto */
+.topbar__iconBtn--settings{
+  border-color: rgba(214,178,94,.35);
+  background: rgba(214,178,94,.10);
+  color: var(--goldSoft);
+}
+
+.topbar__iconBtn--settings:hover{
+  border-color: rgba(255,61,166,.35);
+  background: rgba(255,61,166,.10);
+  color: var(--text);
+}
+
+/* Lang pills */
+.topbar__lang{
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.18);
+}
+
+.pill{
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.pill--active{
+  border-color: rgba(255,61,166,.55);
+  background: rgba(255,61,166,.12);
+  color: var(--text);
+}
+
+/* ✅ Focus visible (accesible y pro) */
+.topbar__iconBtn:focus-visible,
+.pill:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,61,166,.18);
+  border-color: rgba(255,61,166,.45);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .topbar__iconBtn,
+  .pill{ transition: none !important; }
+}

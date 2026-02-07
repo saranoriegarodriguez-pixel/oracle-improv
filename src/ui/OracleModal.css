@@ -1,0 +1,317 @@
+.oracleOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  z-index: 140;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.oracleModal{
+  width: min(720px, 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(240,213,138,.18);
+  background: rgba(12, 10, 18, .96);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.oracleTop{
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(700px 240px at 10% 0%, rgba(240,213,138,.12), transparent 60%),
+    radial-gradient(700px 240px at 90% 0%, rgba(255,61,166,.10), transparent 60%),
+    rgba(12,10,18,.96);
+}
+
+.oracleTitle{
+  font-weight: 950;
+  letter-spacing: .02em;
+}
+
+.oracleBadge{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(240,213,138,.22);
+  background: rgba(240,213,138,.10);
+  color: var(--goldSoft);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.oracleBody{
+  padding: 16px;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.oracleRec{
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(240,213,138,.20);
+  background: rgba(240,213,138,.10);
+  color: var(--text);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.oracleGrid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.oracleBox{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.26);
+  padding: 10px 12px;
+}
+
+.oracleBoxTitle{
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .75;
+  margin-bottom: 8px;
+  color: var(--muted);
+}
+
+.oracleList{
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text2);
+}
+
+.oraclePenalty{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,77,109,.22);
+  background: rgba(255,77,109,.10);
+  color: rgba(255,210,220,.92);
+}
+
+.oracleActions{
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.oracleCloseBtn{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.35);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.oracleCloseBtn:hover{
+  border-color: rgba(255,255,255,.22);
+  background: rgba(0,0,0,.44);
+}
+.oracleBody{
+  overflow: auto;
+  max-height: calc(80vh - 140px);
+}
+
+.oracleRaw{
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.oracleEmpty{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: var(--muted);
+  font-size: 13px;
+  opacity: .9;
+}
+/* src/ui/OracleModal.css */
+
+/* ✅ dos columnas limpias */
+.oracleSplit{
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.oracleStack{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oracleMuted{
+  font-size: 12px;
+  color: var(--text2);
+  opacity: .85;
+}
+
+@media (max-width: 720px){
+  .oracleSplit{
+    grid-template-columns: 1fr;
+  }
+}
+/* src/ui/OracleModal.css */
+
+/* ✅ dos columnas limpias */
+.oracleSplit{
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.oracleStack{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oracleMuted{
+  font-size: 12px;
+  color: var(--text2);
+  opacity: .85;
+}
+
+@media (max-width: 720px){
+  .oracleSplit{
+    grid-template-columns: 1fr;
+  }
+}
+/* === Barras de puntuación === */
+
+.oracleScores{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oracleRow{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.oracleRowTop{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.oracleRowLabel{
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: .01em;
+}
+
+.oracleRowVal{
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--text2);
+  opacity: .95;
+}
+
+.oracleBar{
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.35);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+.oracleBarFill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,61,166,.55),
+    rgba(240,213,138,.55)
+  );
+  box-shadow: 0 0 14px rgba(255,61,166,.12);
+  transition: width .28s ease;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .oracleBarFill{ transition: none !important; }
+}
+/* === Tags FOCO / TOP === */
+.oracleTag{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .02em;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.28);
+  color: var(--text2);
+}
+
+.oracleTag--focus{
+  border-color: rgba(255,77,109,.28);
+  background: linear-gradient(180deg, rgba(255,77,109,.16), rgba(0,0,0,.24));
+  color: rgba(255,255,255,.92);
+}
+
+.oracleTag--best{
+  border-color: rgba(240,213,138,.28);
+  background: linear-gradient(180deg, rgba(240,213,138,.16), rgba(0,0,0,.24));
+  color: rgba(255,255,255,.92);
+}
+
+/* === Enfatiza la fila foco / best === */
+.oracleRow.is-focus .oracleBar{
+  border-color: rgba(255,77,109,.28);
+  box-shadow: 0 0 0 3px rgba(255,77,109,.10), inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+.oracleRow.is-best .oracleBar{
+  border-color: rgba(240,213,138,.28);
+  box-shadow: 0 0 0 3px rgba(240,213,138,.10), inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+.oracleRow.is-best .oracleBarFill{
+  box-shadow: 0 0 20px rgba(240,213,138,.12);
+}
+.oracleBadge--train{
+  border-color: rgba(255,255,255,.18);
+  background: rgba(0,0,0,.30);
+  opacity: .95;
+  letter-spacing: .06em;
+}

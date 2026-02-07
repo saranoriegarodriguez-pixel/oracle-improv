@@ -1,0 +1,14 @@
+/* src/styles/status.css */
+
+.is-success{ border-color: var(--successBorder) !important; }
+.is-warning{ border-color: var(--warningBorder) !important; }
+.is-error{ border-color: var(--dangerBorder) !important; }
+.is-oracle{ border-color: var(--oracleBorder) !important; }
+
+.is-successRing{ box-shadow: 0 0 0 3px var(--successRing) !important; }
+.is-warningRing{ box-shadow: 0 0 0 3px var(--warningRing) !important; }
+.is-errorRing{ box-shadow: 0 0 0 3px var(--dangerRing) !important; }
+.is-oracleRing{ box-shadow: 0 0 0 3px var(--oracleRing) !important; }
+
+/* Utilidad pequeña */
+.muted{ color: var(--muted); }

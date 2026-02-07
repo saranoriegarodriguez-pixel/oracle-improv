@@ -1,0 +1,333 @@
+/* src/pages/Home.css
+   FIX:
+   - Alinea Reset con los Select
+   - Quita “uniones” raras (selects no se pegan visualmente)
+   - Estila el Select custom aunque le pases className="filters__select"
+   - Cards: bustos sin recorte (object-fit: contain)
+*/
+
+.home{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px 16px 60px;
+}
+
+.home__top{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.home__titleRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home__title{
+  font-size: 44px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+  color: var(--text);
+  line-height: 1.05;
+}
+
+.home__dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 18px var(--accentGlow);
+}
+
+/* Search */
+.search{
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+
+.search__icon{
+  opacity: 0.7;
+  margin-right: 8px;
+  color: var(--text2);
+}
+
+.search__input{
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.search__input::placeholder{
+  color: var(--muted);
+}
+
+/* Tabs */
+.tabs{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tab{
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text2);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.tab:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,61,166,0.25);
+}
+
+.tab--active{
+  background: rgba(255,61,166,0.18);
+  border-color: rgba(255,61,166,0.45);
+  color: rgba(255,244,222,0.96);
+  box-shadow: 0 0 0 3px rgba(255,61,166,0.08);
+}
+
+/* -------------------------
+   Filters (FIX REAL)
+------------------------- */
+
+.filters{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 900px){
+  .filters{
+    grid-template-columns: 1fr;
+  }
+}
+
+.filters__group{
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.filters__label{
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+  line-height: 1.1;
+  letter-spacing: .2px;
+}
+
+/* ✅ CLAVE:
+   Como tu Select es custom y el className se pone en el wrapper,
+   hacemos que .filters__select (wrapper) NO meta bordes propios
+   y estilamos el botón interno .cs__btn para que se vea bien.
+*/
+.filters__select{
+  min-width: 0;
+  width: 100%;
+}
+
+/* Evita “uniones” raras:
+   - separa visualmente
+   - no deja que el borde se pegue con el vecino */
+.filters__select .cs__btn{
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.22);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+.filters__select .cs__btn:hover{
+  border-color: var(--borderStrong);
+  background: rgba(0,0,0,0.28);
+}
+
+.filters__select .cs__btn:focus,
+.filters__select .cs__btn:focus-visible{
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--accentGlow),
+    inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* El texto placeholder */
+.filters__select .cs__value.is-placeholder{
+  opacity: .78;
+  color: var(--text2);
+}
+
+/* ✅ IMPORTANTE:
+   tu Select dropdown usa portal y clases .cs__pop / .cs__list etc.
+   En tu Select.css la “caja” correcta es .cs__pop, pero en tu TSX
+   estás renderizando el dropdown como .cs__list (y encima con position: fixed…)
+   Aun así, aquí aseguramos que NO herede estilos raros de filters.
+*/
+.filters__select .cs__list{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(12, 10, 18, .96);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: fixed;
+  z-index: 9999;
+}
+
+/* Reset aligned */
+.filters__reset{
+  border: 1px solid rgba(214,178,94,0.32);
+  background: rgba(214,178,94,0.10);
+  color: rgba(255,244,222,0.92);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 950;
+  cursor: pointer;
+  height: 42px;
+  transition: transform 120ms ease, filter 120ms ease;
+  white-space: nowrap;
+
+  /* ✅ Alineación real con inputs (baja el botón el alto del label) */
+  margin-top: 20px;
+  align-self: start;
+  justify-self: end;
+}
+
+.filters__reset:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+@media (max-width: 900px){
+  .filters__reset{
+    width: 100%;
+    justify-self: stretch;
+    margin-top: 0;
+  }
+}
+
+/* -------------------------
+   Grid
+------------------------- */
+.grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 980px){
+  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+/* -------------------------
+   Card
+------------------------- */
+.card{
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.card::before{
+  content: "";
+  display: block;
+  aspect-ratio: 3 / 4;
+}
+
+.card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,61,166,0.22);
+  box-shadow: 0 0 0 3px rgba(255,61,166,0.08);
+}
+
+.card__img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 10px;
+  background: radial-gradient(120% 120% at 50% 20%, rgba(255,255,255,0.06), rgba(0,0,0,0.0));
+}
+
+.card__overlay{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 12px 12px;
+  color: var(--text);
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.86) 0%,
+    rgba(0,0,0,0.55) 55%,
+    rgba(0,0,0,0.0) 100%
+  );
+}
+
+.card__title{
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+.card__desc{
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.35;
+  max-height: 2.7em;
+  overflow: hidden;
+}
+
+.chips{
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip{
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(255,244,222,0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  padding: 6px 8px;
+  border-radius: 999px;
+}
+
+.empty{
+  margin-top: 14px;
+  color: var(--text2);
+  opacity: 0.9;
+  border: 1px dashed rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.02);
+  border-radius: 16px;
+  padding: 14px;
+}

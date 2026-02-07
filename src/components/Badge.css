@@ -1,0 +1,26 @@
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.30);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .01em;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+.badge--soft{
+  font-weight: 800;
+  background: rgba(255,255,255,.06);
+}
+
+.badge--neutral{ border-color: var(--borderStrong); }
+.badge--accent{ border-color: rgba(255,61,166,.55); box-shadow: 0 0 0 3px var(--accentGlow), inset 0 0 0 1px rgba(0,0,0,.35); }
+.badge--gold{ border-color: var(--oracleBorder); box-shadow: 0 0 0 3px var(--goldGlow), inset 0 0 0 1px rgba(0,0,0,.35); }
+.badge--success{ border-color: var(--successBorder); box-shadow: 0 0 0 3px var(--successRing), inset 0 0 0 1px rgba(0,0,0,.35); }
+.badge--warning{ border-color: var(--warningBorder); box-shadow: 0 0 0 3px var(--warningRing), inset 0 0 0 1px rgba(0,0,0,.35); }
+.badge--danger{ border-color: var(--dangerBorder); box-shadow: 0 0 0 3px var(--dangerRing), inset 0 0 0 1px rgba(0,0,0,.35); }
