@@ -17,6 +17,9 @@ import { enforceSessionLimits } from "./middleware/limits";
 import { enforceMonthlyBudget } from "./middleware/budget";
 import { rateLimitAI } from "./middleware/rateLimit";
 
+// ✅ Google OAuth
+import { googleAuthRouter } from "./routes/googleAuth";
+
 const app = express();
 
 // ✅ importante si estás detrás de proxy (Render/Fly/Nginx)
@@ -39,16 +42,27 @@ app.get("/health", (_req, res) => {
   });
 });
 
+/* -------- Google OAuth -------- */
+app.use("/auth", googleAuthRouter);
+
 /* -------- Middlewares IA -------- */
 const limitsMw = enforceSessionLimits({ requireSessionId: true });
 const budgetMw = enforceMonthlyBudget();
 const rateMw = rateLimitAI();
 
-function requireUsernameForOpenAI(req: Request, res: Response, next: NextFunction) {
-  const u = typeof (req.body as any)?.username === "string" ? String((req.body as any).username).trim() : "";
+function requireUsernameForOpenAI(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const u =
+    typeof (req.body as any)?.username === "string"
+      ? String((req.body as any).username).trim()
+      : "";
   if (!u) {
     return res.status(400).json({
-      error: "Missing username. Required when provider=openai for budget/limits tracking.",
+      error:
+        "Missing username. Required when provider=openai for budget/limits tracking.",
     });
   }
   return next();
@@ -127,4 +141,8 @@ app.listen(PORT, () => {
   console.log(`Eval:   http://localhost:${PORT}/api/evaluate`);
   console.log(`Usage:  http://localhost:${PORT}/api/usage/:username`);
   console.log(`Budget: http://localhost:${PORT}/api/budget/:username`);
+
+  // ✅ Google OAuth
+  console.log(`OAuth:  http://localhost:${PORT}/auth/google`);
+  console.log(`CB:     http://localhost:${PORT}/auth/callback/google`);
 });
