@@ -3,13 +3,13 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
-import { CHARACTERS, PLAYER_LEVELS, SKILLS } from "../../shared/data/characters";
-import type { Character, PlayerLevel, SkillKey } from "../../shared/types";
+import { CHARACTERS, PLAYER_LEVELS, SKILLS } from "../../../shared/data/characters";
+import type { Character, PlayerLevel, SkillKey } from "../../../shared/types";
 
-import { useAppSettings } from "../state/appSettings";
-import { getCharacterUseCount, loadPoints, pointsToPercent } from "../state/profileStore";
+import { useAppSettings } from "../../state/appSettings";
+import { getCharacterUseCount, loadPoints, pointsToPercent } from "../../state/profileStore";
 
-import Select from "../components/Select";
+import Select from "../../components/Select";
 
 const TABS = [
   { key: "forYou", label: { es: "Para ti", en: "For you" } },

@@ -2,11 +2,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { CHARACTERS } from "../../shared/data/characters";
-import type { PlayerLevel } from "../../shared/types";
+import { CHARACTERS } from "../../../shared/data/characters";
+import type { PlayerLevel } from "../../../shared/types";
 
-import { useAppSettings } from "../state/appSettings";
-import Select from "../components/Select";
+import { useAppSettings } from "../../state/appSettings";
+import Select from "../../components/Select";
+
 
 import "./Scene.css";
 

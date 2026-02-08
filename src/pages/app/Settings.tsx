@@ -1,15 +1,16 @@
 // src/pages/Settings.tsx
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import "./Settings.css";
-import Select, { type SelectOption } from "../components/Select";
 
-// ✅ IMPORTS CORRECTOS (sin / inicial)
-import { PLAYER_LEVELS } from "../../shared/data/characters";
-import type { PlayerLevel } from "../../shared/types";
+import Select, { type SelectOption } from "../../components/Select";
 
-import { useAppSettings } from "../state/appSettings";
-import { loadUsername, saveUsername, resetSkillPoints } from "../state/profileStore";
-import { clearSummaries } from "../state/profileSummaries";
+import { PLAYER_LEVELS } from "../../../shared/data/characters";
+import type { PlayerLevel } from "../../../shared/types";
+
+import { useAppSettings } from "../../state/appSettings";
+import { loadUsername, saveUsername, resetSkillPoints } from "../../state/profileStore";
+import { clearSummaries } from "../../state/profileSummaries";
+
 
 type Lang = "es" | "en";
 type AiProvider = "ollama" | "openai";

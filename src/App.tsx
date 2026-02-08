@@ -3,16 +3,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 
 // Portfolio
-import PortfolioHome from "./pages/PortfolioHome";
-import PortfolioWork from "./pages/PortfolioWork";
-import CaseStudyOracleImprov from "./pages/CaseStudyOracleImprov";
+import PortfolioHome from "./pages/portfolio/PortfolioHome";
+import PortfolioWork from "./pages/portfolio/PortfolioWork";
+import CaseStudyOracleImprov from "./pages/portfolio/CaseStudyOracleImprov";
 
 // ✅ (futuro) Case study genérico para nuevos proyectos
 // Si todavía no lo has creado, créalo como archivo (te dejo abajo el contenido).
-import CaseStudyGeneric from "./pages/CaseStudyGeneric";
+import CaseStudyGeneric from "./pages/portfolio/CaseStudyGeneric";
 
 // App real
-import AppShell from "./pages/AppShell";
+import AppShell from "./pages/app/AppShell";
 
 export default function App() {
   return (

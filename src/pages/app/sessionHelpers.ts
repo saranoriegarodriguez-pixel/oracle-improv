@@ -1,7 +1,8 @@
 // src/pages/sessionHelpers.ts
 
-import { exerciseLabel, exerciseDesc } from "../../shared/data/exercises";
-import type { Character } from "../../shared/types";
+import { exerciseLabel, exerciseDesc } from "../../../shared/data/exercises";
+import type { Character } from "../../../shared/types";
+
 
 // -------------------------
 // Tipos

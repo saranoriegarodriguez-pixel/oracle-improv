@@ -3,14 +3,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./Session.css";
 
-import { CHARACTERS } from "../../shared/data/characters";
-import type { Character } from "../../shared/types";
+import { CHARACTERS } from "../../../shared/data/characters";
+import type { Character } from "../../../shared/types";
 
-import { useAppSettings } from "../state/appSettings";
-import { loadUsername, applyOraclePoints } from "../state/profileStore";
-import { saveSummary } from "../state/profileSummaries";
-import { sendEvaluate, normalizeOracle, sumPoints } from "../api/evaluate";
-import { useToast, useOracleFeedback } from "../state/feedback/FeedbackProvider";
+import { useAppSettings } from "../../state/appSettings";
+import { loadUsername, applyOraclePoints } from "../../state/profileStore";
+import { saveSummary } from "../../state/profileSummaries";
+import { sendEvaluate, normalizeOracle, sumPoints } from "../../api/evaluate";
+import { useToast, useOracleFeedback } from "../../state/feedback/FeedbackProvider";
 
 import {
   safeExercise,
@@ -24,6 +24,7 @@ import {
   type Mode,
   type Lang,
 } from "./sessionHelpers";
+
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";

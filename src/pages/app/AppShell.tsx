@@ -7,7 +7,7 @@ import Session from "./Session";
 import Profile from "./Profile";
 import Settings from "./Settings";
 
-import { FeedbackProvider } from "../state/feedback/FeedbackProvider";
+import { FeedbackProvider } from "../../state/feedback/FeedbackProvider";
 
 export default function AppShell() {
   return (

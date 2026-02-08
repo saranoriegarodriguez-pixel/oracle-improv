@@ -2,16 +2,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./Profile.css";
 
-import { useAppSettings } from "../state/appSettings";
+import { useAppSettings } from "../../state/appSettings";
 
-import { loadUsername, loadPoints, pointsToPercent } from "../state/profileStore";
-import { PLAYER_LEVELS } from "../../shared/data/characters";
-import type { PlayerLevel, SkillKey } from "../../shared/types";
+import { loadUsername, loadPoints, pointsToPercent } from "../../state/profileStore";
+import { loadSummaries } from "../../state/profileSummaries";
 
-import { loadSummaries } from "../state/profileSummaries";
+import { PLAYER_LEVELS } from "../../../shared/data/characters";
+import type { PlayerLevel, SkillKey } from "../../../shared/types";
+
 import jsPDF from "jspdf";
 
-import { fetchBudget, type BudgetResponse } from "../api/budget";
+import { fetchBudget, type BudgetResponse } from "../../api/budget";
 
 type Lang = "es" | "en";
 
