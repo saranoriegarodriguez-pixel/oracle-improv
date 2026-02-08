@@ -1,50 +1,48 @@
-// src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
-import "./App.css";
 
-// Portfolio
+// APP
+import AppShell from "./pages/app/AppShell";
+import Home from "./pages/app/Home";
+import Scene from "./pages/app/Scene";
+import Session from "./pages/app/Session";
+import Profile from "./pages/app/Profile";
+import Settings from "./pages/app/Settings";
+
+// PORTFOLIO
+import PortfolioLayout from "./pages/portfolio/PortfolioLayout";
 import PortfolioHome from "./pages/portfolio/PortfolioHome";
 import PortfolioWork from "./pages/portfolio/PortfolioWork";
+import About from "./pages/portfolio/About";
+import Contact from "./pages/portfolio/Contact";
 import CaseStudyOracleImprov from "./pages/portfolio/CaseStudyOracleImprov";
-
-// ✅ (futuro) Case study genérico para nuevos proyectos
-// Si todavía no lo has creado, créalo como archivo (te dejo abajo el contenido).
 import CaseStudyGeneric from "./pages/portfolio/CaseStudyGeneric";
-
-// App real
-import AppShell from "./pages/app/AppShell";
 
 export default function App() {
   return (
     <Routes>
-      {/* =========================
-          PORTFOLIO
-      ========================== */}
-      <Route path="/" element={<PortfolioHome />} />
+      {/* ✅ APP siempre en /app */}
+      <Route path="/app" element={<AppShell />}>
+        <Route index element={<Navigate to="/app/home" replace />} />
+        <Route path="home" element={<Home />} />
+        <Route path="scene" element={<Scene />} />
+        <Route path="session" element={<Session />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<Settings />} />
+      </Route>
 
-      {/* Listado de proyectos */}
-      <Route path="/work" element={<PortfolioWork />} />
+      {/* ✅ PORTFOLIO bilingüe */}
+      <Route path="/:lang(es|en)" element={<PortfolioLayout />}>
+        <Route index element={<PortfolioHome />} />
+        <Route path="work" element={<PortfolioWork />} />
+        <Route path="work/:slug" element={<CaseStudyGeneric />} />
+        <Route path="work/oraculo-improv" element={<CaseStudyOracleImprov />} />
+        <Route path="about" element={<About />} />
+        <Route path="contact" element={<Contact />} />
+      </Route>
 
-      {/* Case study principal (fijo, bonito) */}
-      <Route path="/work/oraculo-improv" element={<CaseStudyOracleImprov />} />
-
-      {/* ✅ FUTURO: cualquier otro proyecto sin tocar el router
-          Ejemplos:
-          /work/videojuego-god
-          /work/unreal-jam-7days
-          /work/mil-ideas
-      */}
-      <Route path="/work/:slug" element={<CaseStudyGeneric />} />
-
-      {/* =========================
-          APP REAL
-      ========================== */}
-      <Route path="/app/*" element={<AppShell />} />
-
-      {/* =========================
-          FALLBACK
-      ========================== */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* ✅ entrypoints */}
+      <Route path="/" element={<Navigate to="/es" replace />} />
+      <Route path="*" element={<Navigate to="/es" replace />} />
     </Routes>
   );
 }
