@@ -1,0 +1,51 @@
+/* ===== Portfolio Home ===== */
+
+.pHome {
+  display: grid;
+  gap: 16px;
+}
+
+.pHero {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,61,166,0.10), transparent 45%),
+    radial-gradient(circle at 75% 75%, rgba(240,213,138,0.10), transparent 45%),
+    rgba(14, 11, 20, 0.62);
+  box-shadow: var(--shadow);
+}
+
+.pHero__kicker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.pHero__title {
+  margin: 0;
+  font-size: clamp(30px, 3.4vw, 44px);
+  letter-spacing: -0.8px;
+  line-height: 1.03;
+}
+
+.pHero__subtitle {
+  margin: 10px 0 0;
+  color: var(--text2);
+  max-width: 86ch;
+  line-height: 1.45;
+}
+
+.pHero__actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pSection {
+  display: grid;
+  gap: 10px;
+}

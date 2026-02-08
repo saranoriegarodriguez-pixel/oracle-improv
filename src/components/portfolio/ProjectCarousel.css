@@ -1,0 +1,139 @@
+.pc {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.pc__rail {
+  display: grid;
+  gap: 12px;
+}
+
+.pcCard {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(7, 6, 11, 0.52);
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: 0 18px 60px rgba(0,0,0,.35);
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  min-height: 132px;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.pcCard:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.05);
+}
+
+.pcCard.is-active {
+  border-color: rgba(255, 61, 166, 0.22);
+  background: rgba(255, 61, 166, 0.08);
+}
+
+.pcCard__media {
+  position: relative;
+  height: 100%;
+  background: rgba(255,255,255,0.03);
+}
+
+.pcCard__media img,
+.pcCard__media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.pcCard__veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 25%, rgba(255,61,166,0.18), transparent 55%),
+              radial-gradient(circle at 70% 80%, rgba(240,213,138,0.14), transparent 55%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.pcCard__body {
+  padding: 12px 12px 12px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.pcCard__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.pcCard__title {
+  font-weight: 950;
+  letter-spacing: -0.2px;
+}
+
+.pcCard__tagline {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.pcCard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pcCard__cta {
+  margin-top: 2px;
+}
+
+/* Preview */
+.pc__preview {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(7, 6, 11, 0.52);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 76px;
+}
+
+.pcPrev {
+  display: grid;
+  gap: 10px;
+}
+
+.pcPrev__kicker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pcPrev__title {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.6px;
+  line-height: 1.06;
+}
+
+.pcPrev__text {
+  margin: 0;
+  color: var(--text2);
+}
+
+.pcPrev__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 980px) {
+  .pc { grid-template-columns: 1fr; }
+  .pc__preview { position: relative; top: 0; }
+  .pcCard { grid-template-columns: 140px 1fr; }
+}
