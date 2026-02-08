@@ -1,14 +1,14 @@
 // server/characterPrompt.ts
 import type { Request, Response } from "express";
 
-type CharacterPromptBody = {
+export type CharacterPromptBody = {
   lang: "es" | "en";
   level: 1 | 2 | 3 | 4;
   exerciseId: string;
   charSlug: string;
 };
 
-export async function characterPromptRoute(req: Request, res: Response) {
+export async function characterPromptHandler(req: Request, res: Response) {
   try {
     const body = req.body as Partial<CharacterPromptBody>;
     const { lang, level, exerciseId, charSlug } = body;
@@ -69,7 +69,8 @@ export async function characterPromptRoute(req: Request, res: Response) {
           ].join("\n");
 
     return res.json({ systemPrompt });
-  } catch (err: any) {
-    return res.status(500).json({ error: err?.message ?? "Unknown error" });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return res.status(500).json({ error: message });
   }
 }

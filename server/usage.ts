@@ -6,7 +6,7 @@ import { getUsageForUser } from "./middleware/limits";
 export const usageRouter = Router();
 
 // GET /api/usage/:username
-usageRouter.get("/usage/:username", (req, res) => {
+usageRouter.get("/:username", (req, res) => {
   const username = String(req.params.username ?? "").trim().toLowerCase();
   const usedToday = username ? getUsageForUser(username) : 0;
   const remaining = Math.max(0, MAX_SESSIONS_PER_DAY - usedToday);

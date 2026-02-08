@@ -1,7 +1,7 @@
 // server/evaluate.ts
-import express from "express";
+import type { Request, Response } from "express";
 import type { ProviderName, ChatMessage as ProviderChatMessage } from "./types";
-import { DEFAULT_PROVIDER } from "./env";
+import { AI_PROVIDER } from "./env";
 import { chatWithOllama } from "./providers/ollama";
 import { chatWithOpenAI } from "./providers/openai";
 
@@ -13,7 +13,7 @@ type OracleSkill = "clarity" | "desire" | "listening" | "status" | "ending";
 type OraclePoints = Record<OracleSkill, number>;
 type OracleEvidence = Record<OracleSkill, string[]>;
 
-type EvaluateBody = {
+export type EvaluateBody = {
   lang: "es" | "en";
   mode: "train" | "scene" | "trial";
   level: 1 | 2 | 3 | 4;
@@ -28,7 +28,6 @@ type EvaluateBody = {
   provider?: ProviderName;
   model?: string;
 
-  // tracking (opcional)
   sessionId?: string;
   username?: string;
 };
@@ -36,11 +35,8 @@ type EvaluateBody = {
 type OracleJson = {
   points: OraclePoints;
   evidence: OracleEvidence;
-
-  // text general (fallback)
   text: string;
 
-  // ✅ extra (para tu modal)
   recommendation?: string;
   mistakes?: string[];
   tips?: string[];
@@ -96,13 +92,11 @@ function normalizeOracle(obj: any): OracleJson {
 function safeParseOracleJson(raw: string): any {
   if (!raw) throw new Error("Oracle returned empty response");
 
-  // 1) intento directo
   try {
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object") return parsed;
   } catch {}
 
-  // 2) intenta extraer { ... } si viene envuelto en texto
   const first = raw.indexOf("{");
   const last = raw.lastIndexOf("}");
   if (first !== -1 && last !== -1 && last > first) {
@@ -200,12 +194,10 @@ Rules:
 }
 
 /* =========================================================
-   ROUTER
+   HANDLER (SIN ROUTER)
 ========================================================= */
 
-export const evaluateRouter = express.Router();
-
-evaluateRouter.post("/evaluate", async (req, res) => {
+export async function evaluateHandler(req: Request, res: Response) {
   try {
     const body = req.body as EvaluateBody;
 
@@ -213,12 +205,11 @@ evaluateRouter.post("/evaluate", async (req, res) => {
       return res.status(400).json({ error: "messages[] is required" });
     }
 
-    const provider: ProviderName = body.provider ?? DEFAULT_PROVIDER;
+    const provider: ProviderName =
+      body.provider ?? (AI_PROVIDER as ProviderName) ?? "ollama";
 
-    // 1) system prompt oráculo
     const oracleSystem = buildOracleSystemPrompt(body);
 
-    // 2) conversación para evaluar
     const evalMessages: ProviderChatMessage[] = [
       { role: "system", content: oracleSystem },
       {
@@ -229,13 +220,12 @@ evaluateRouter.post("/evaluate", async (req, res) => {
       },
     ];
 
-    // 3) llamada IA (reusando tus providers)
     const out =
       provider === "openai"
         ? await chatWithOpenAI({
             provider: "openai",
             model: body.model,
-            mode: body.mode, // caps por modo
+            mode: body.mode,
             messages: evalMessages,
             temperature: 0.2,
             sessionId: body.sessionId,
@@ -249,21 +239,18 @@ evaluateRouter.post("/evaluate", async (req, res) => {
             temperature: 0.2,
             sessionId: body.sessionId,
             username: body.username,
-            oracle: true, // ✅ activa ORACLE_MODEL
+            oracle: true,
           });
 
     const rawText = out?.message?.content ?? "";
 
-    // 4) parse + normaliza
     const parsed = safeParseOracleJson(rawText);
     const oracle = normalizeOracle(parsed);
 
-    // 5) si el modelo dejó penalty vacío, lo quitamos
     if (typeof oracle.penalty === "string" && !oracle.penalty.trim()) {
       delete oracle.penalty;
     }
 
-    // 6) fallback: si text vacío, crea uno corto
     if (!oracle.text?.trim()) {
       oracle.text =
         body.lang === "es"
@@ -271,7 +258,6 @@ evaluateRouter.post("/evaluate", async (req, res) => {
           : "Oracle feedback generated.";
     }
 
-    // 7) score total para UI
     const score = sumPoints(oracle.points);
 
     return res.json({
@@ -279,9 +265,9 @@ evaluateRouter.post("/evaluate", async (req, res) => {
       score,
       provider: out.provider,
       model: out.model,
-      // raw: parsed,
     });
-  } catch (err: any) {
-    return res.status(500).json({ error: err?.message ?? "Unknown error" });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return res.status(500).json({ error: message });
   }
-});
+}
