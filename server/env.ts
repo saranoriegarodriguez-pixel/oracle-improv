@@ -56,3 +56,12 @@ export const RATE_LIMIT_MAX_REQ = num(process.env.RATE_LIMIT_MAX_REQ ?? 30, 30);
 
 /** ✅ Debug: devolver raw solo si está activado */
 export const DEBUG_RAW = bool01(process.env.DEBUG_RAW);
+/** Google OAuth */
+export const GOOGLE_CLIENT_ID =
+  process.env.GOOGLE_CLIENT_ID ?? "";
+
+export const GOOGLE_CLIENT_SECRET =
+  process.env.GOOGLE_CLIENT_SECRET ?? "";
+
+export const GOOGLE_REDIRECT_URI =
+  process.env.GOOGLE_REDIRECT_URI ?? "";
