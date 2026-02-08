@@ -18,7 +18,7 @@ import { enforceMonthlyBudget } from "./middleware/budget";
 import { rateLimitAI } from "./middleware/rateLimit";
 
 // ✅ Google OAuth
-import { googleAuthRouter } from "./routes/googleAuth";
+import { googleAuthRouter } from "./routes/googleAuth.ts";
 
 const app = express();
 

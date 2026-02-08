@@ -17,45 +17,52 @@ function cleanupStateStore() {
   }
 }
 
-googleAuthRouter.get("/auth/google", (req: Request, res: Response) => {
-  cleanupStateStore();
+googleAuthRouter.get(
+  "/auth/google",
+  (_req: Request, res: Response) => {
+    cleanupStateStore();
 
-  if (!GOOGLE_CLIENT_ID) {
-    return res.status(500).send("Missing GOOGLE_CLIENT_ID");
+    if (!GOOGLE_CLIENT_ID) {
+      return res.status(500).send("Missing GOOGLE_CLIENT_ID");
+    }
+    if (!GOOGLE_REDIRECT_URI) {
+      return res.status(500).send("Missing GOOGLE_REDIRECT_URI");
+    }
+
+    const state = crypto.randomBytes(24).toString("hex");
+    stateStore.set(state, Date.now());
+
+    const params = new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: GOOGLE_REDIRECT_URI,
+      response_type: "code",
+      scope: [
+        "openid",
+        "email",
+        "profile",
+      ].join(" "),
+      state,
+      access_type: "offline", // te da refresh_token cuando aplique
+      prompt: "consent",      // fuerza consentimiento (útil en dev)
+    });
+
+    const authUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+
+    return res.redirect(authUrl);
   }
-  if (!GOOGLE_REDIRECT_URI) {
-    return res.status(500).send("Missing GOOGLE_REDIRECT_URI");
-  }
-
-  const state = crypto.randomBytes(24).toString("hex");
-  stateStore.set(state, Date.now());
-
-  const params = new URLSearchParams({
-    client_id: GOOGLE_CLIENT_ID,
-    redirect_uri: GOOGLE_REDIRECT_URI,
-    response_type: "code",
-    scope: [
-      "openid",
-      "email",
-      "profile",
-    ].join(" "),
-    state,
-    access_type: "offline", // te da refresh_token cuando aplique
-    prompt: "consent",      // fuerza consentimiento la 1ª vez (útil en dev)
-  });
-
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  return res.redirect(authUrl);
-});
+);
 
 // (Opcional) exporta esto si lo quieres usar luego en el token exchange
 export function consumeState(state: string) {
   const ts = stateStore.get(state);
   if (!ts) return false;
+
   if (Date.now() - ts > STATE_TTL_MS) {
     stateStore.delete(state);
     return false;
   }
+
   stateStore.delete(state);
   return true;
 }
