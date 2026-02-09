@@ -5,7 +5,11 @@
       "destination": "/index.html"
     },
     {
-      "source": "/:lang(es|en)/:path*",
+      "source": "/es/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/en/:path*",
       "destination": "/index.html"
     },
     {
