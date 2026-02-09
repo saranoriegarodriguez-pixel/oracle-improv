@@ -1,4 +1,6 @@
+// src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
+import "./App.css";
 
 // APP
 import AppShell from "./pages/app/AppShell";
@@ -20,7 +22,7 @@ import CaseStudyGeneric from "./pages/portfolio/CaseStudyGeneric";
 export default function App() {
   return (
     <Routes>
-      {/* ✅ APP siempre en /app */}
+      {/* ✅ APP: siempre en /app */}
       <Route path="/app" element={<AppShell />}>
         <Route index element={<Navigate to="/app/home" replace />} />
         <Route path="home" element={<Home />} />
@@ -33,14 +35,16 @@ export default function App() {
       {/* ✅ PORTFOLIO bilingüe */}
       <Route path="/:lang(es|en)" element={<PortfolioLayout />}>
         <Route index element={<PortfolioHome />} />
+
         <Route path="work" element={<PortfolioWork />} />
-        <Route path="work/:slug" element={<CaseStudyGeneric />} />
         <Route path="work/oraculo-improv" element={<CaseStudyOracleImprov />} />
+        <Route path="work/:slug" element={<CaseStudyGeneric />} />
+
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
       </Route>
 
-      {/* ✅ entrypoints */}
+      {/* ✅ Entrypoints */}
       <Route path="/" element={<Navigate to="/es" replace />} />
       <Route path="*" element={<Navigate to="/es" replace />} />
     </Routes>

@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/app/:path*", "destination": "/index.html" },
+    { "source": "/:lang(es|en)/:path*", "destination": "/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
+  ]
+}
