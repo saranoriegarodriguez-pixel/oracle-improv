@@ -39,7 +39,12 @@ export default function ProjectCarousel({ lang, projects, activeSlug }: Props) {
             >
               <div className="pcCard__media">
                 {cover.kind === "image" ? (
-                  <img src={cover.src} alt={p.title[lang]} loading="lazy" />
+                  <img
+                    src={cover.src}
+                    alt={p.title[lang]}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   <video
                     src={cover.src}
@@ -77,7 +82,7 @@ export default function ProjectCarousel({ lang, projects, activeSlug }: Props) {
         })}
       </div>
 
-      {/* panel de “preview” a la derecha */}
+      {/* panel de preview a la derecha */}
       <div className="pc__preview">
         {items
           .filter((p) => p.slug === focusSlug)

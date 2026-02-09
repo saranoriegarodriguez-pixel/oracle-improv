@@ -11,11 +11,10 @@ export type Project = {
   // media principal (para carrusel)
   cover: {
     kind: "image" | "video";
-    src: string; // ruta /media/...
-    poster?: string; // para video
+    src: string; // ruta desde /public
+    poster?: string;
   };
 
-  // links opcionales
   links?: Array<{
     label: { es: string; en: string };
     href: string;
@@ -27,17 +26,19 @@ export const PROJECTS: Project[] = [
     slug: "oraculo-improv",
     title: { es: "Oráculo-Improv", en: "Oracle-Improv" },
     tagline: {
-      es: "Entrenamiento de improvisación teatral con personajes + Oráculo evaluador.",
-      en: "Theatre improv training with characters + an evaluator Oracle.",
+      es: "Entrenamiento de improvisación teatral con personajes y un Oráculo evaluador.",
+      en: "Improv theatre training with characters and an evaluator Oracle.",
     },
     year: "2026",
     status: { es: "Producto / Demo", en: "Product / Demo" },
     tags: ["IA", "UX", "Teatro", "Evaluación", "React"],
+
+    // 👉 imagen 1 del carrusel
     cover: {
-      kind: "video",
-      src: "/media/oracle-improv/hero.mp4",
-      poster: "/media/oracle-improv/screen1.png",
+      kind: "image",
+      src: "/media/carousel/carousel-01.jpg",
     },
+
     links: [
       { label: { es: "Abrir demo", en: "Open demo" }, href: "/app/home" },
     ],
@@ -52,10 +53,12 @@ export const PROJECTS: Project[] = [
     },
     year: "2026",
     status: { es: "En desarrollo", en: "In progress" },
-    tags: ["ChatGPT", "Sora", "Narrativa", "Dirección"],
+    tags: ["Narrativa", "IA", "Dirección", "Mitología"],
+
+    // 👉 imagen 2 del carrusel
     cover: {
       kind: "image",
-      src: "/media/cotilleos/cover.png",
+      src: "/media/carousel/carousel-02.jpg",
     },
   },
 
@@ -63,15 +66,17 @@ export const PROJECTS: Project[] = [
     slug: "rv-teatro-de-tus-suenos",
     title: { es: "RV · El teatro de tus sueños", en: "VR · Theatre of Your Dreams" },
     tagline: {
-      es: "Experiencia en Unreal Engine 5: demos de un día en pesado.",
-      en: "Unreal Engine 5 experience: ‘one-day heavy’ demos.",
+      es: "Experiencia inmersiva en Unreal Engine 5 sobre el teatro clásico.",
+      en: "Immersive Unreal Engine 5 experience about classical theatre.",
     },
     year: "2026",
     status: { es: "Demos", en: "Demos" },
-    tags: ["Unreal Engine 5", "VR", "Cinemática", "XR"],
+    tags: ["Unreal Engine 5", "VR", "XR", "Cinemática"],
+
+    // 👉 imagen 3 del carrusel
     cover: {
       kind: "image",
-      src: "/media/rv/cover.png",
+      src: "/media/carousel/carousel-03.jpg",
     },
   },
 ];
