@@ -1,88 +1,63 @@
 // src/components/Topbar.tsx
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAppSettings } from "../state/appSettings";
 import {
-  getPortfolioLang,
-  switchLangPath,
-  type Lang as PortfolioLang,
+  useLang,
+  useSwitchLangPath,
+  type Lang,
 } from "../pages/portfolio/lang";
 import "./Topbar.css";
-
-type UiLang = "es" | "en";
 
 export default function Topbar() {
   const nav = useNavigate();
   const loc = useLocation();
   const { st, setLang } = useAppSettings();
 
-  // Idioma global (app)
-  const appLang: UiLang = (st.lang ?? "es") as UiLang;
-
-  // Zona actual
   const inApp = loc.pathname === "/app" || loc.pathname.startsWith("/app/");
-  const portfolioLang: PortfolioLang = getPortfolioLang(loc.pathname) ?? "es";
-  const inPortfolio = !!getPortfolioLang(loc.pathname);
+  const portfolioLang = useLang();
+  const appLang = (st.lang ?? "es") as Lang;
+  const lang = inApp ? appLang : portfolioLang;
 
-  // Idioma “activo” para la UI (depende de dónde estés)
-  const lang: UiLang = inPortfolio ? portfolioLang : appLang;
+  const switchPortfolioPath = useSwitchLangPath();
 
   function goPortfolioHome() {
-    nav(`/${portfolioLang}`);
+    nav(`/${lang}`);
   }
 
   function goAppHome() {
     nav("/app/home");
   }
 
-  function onToggleLang(next: UiLang) {
-    // Portfolio: cambia la ruta (/es/... <-> /en/...)
-    if (inPortfolio) {
-      nav(switchLangPath(loc.pathname, next));
-      return;
+  function onToggleLang(next: Lang) {
+    if (inApp) {
+      setLang(next);
+    } else {
+      nav(switchPortfolioPath(next));
     }
-
-    // App: solo cambia estado (no toca la ruta)
-    setLang(next);
   }
-
-  const portfolioBtnDisabled =
-    inPortfolio && (loc.pathname === `/${portfolioLang}` || loc.pathname === `/${portfolioLang}/`);
-
-  const appBtnDisabled =
-    inApp &&
-    (loc.pathname === "/app" ||
-      loc.pathname === "/app/" ||
-      loc.pathname === "/app/home");
 
   return (
     <header className="topbar">
       <div className="topbar__inner">
-        {/* 🌐 Portfolio */}
+
+        {/* Portfolio */}
         <button
           className="topbar__iconBtn"
-          type="button"
           onClick={goPortfolioHome}
-          aria-label={lang === "es" ? "Ir al portfolio" : "Go to portfolio"}
+          disabled={!inApp && loc.pathname === `/${lang}`}
           title="Portfolio"
-          disabled={portfolioBtnDisabled}
         >
-          <span className="topbar__icon" aria-hidden>
-            🌐
-          </span>
+          🌐
         </button>
 
-        {/* 🏠 App */}
+        {/* App */}
         <button
           className="topbar__iconBtn"
-          type="button"
           onClick={goAppHome}
-          aria-label={lang === "es" ? "Ir a la app" : "Go to app"}
+          disabled={inApp && loc.pathname === "/app/home"}
           title="App"
-          disabled={appBtnDisabled}
         >
-          <span className="topbar__icon" aria-hidden>
-            🏠
-          </span>
+          🏠
         </button>
 
         <div className="topbar__spacer" />
@@ -91,16 +66,13 @@ export default function Topbar() {
         <div className="topbar__lang" role="group" aria-label="Language">
           <button
             className={`pill ${lang === "es" ? "pill--active" : ""}`}
-            type="button"
             onClick={() => onToggleLang("es")}
             aria-pressed={lang === "es"}
           >
             ES
           </button>
-
           <button
             className={`pill ${lang === "en" ? "pill--active" : ""}`}
-            type="button"
             onClick={() => onToggleLang("en")}
             aria-pressed={lang === "en"}
           >
@@ -108,31 +80,22 @@ export default function Topbar() {
           </button>
         </div>
 
-        {/* Solo en la app: Perfil + Ajustes */}
+        {/* SOLO APP */}
         {inApp && (
           <>
             <button
-              className="topbar__iconBtn topbar__iconBtn--profile"
-              type="button"
+              className="topbar__iconBtn"
               onClick={() => nav("/app/profile")}
-              title={lang === "es" ? "Perfil" : "Profile"}
-              aria-label={lang === "es" ? "Perfil" : "Profile"}
+              title="Profile"
             >
-              <span className="topbar__icon" aria-hidden>
-                👤
-              </span>
+              👤
             </button>
-
             <button
-              className="topbar__iconBtn topbar__iconBtn--settings"
-              type="button"
+              className="topbar__iconBtn"
               onClick={() => nav("/app/settings")}
-              title={lang === "es" ? "Ajustes" : "Settings"}
-              aria-label={lang === "es" ? "Ajustes" : "Settings"}
+              title="Settings"
             >
-              <span className="topbar__icon" aria-hidden>
-                ⚙️
-              </span>
+              ⚙️
             </button>
           </>
         )}
