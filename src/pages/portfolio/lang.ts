@@ -1,45 +1,44 @@
 // src/pages/portfolio/lang.ts
-import { useLocation, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
-export type PortfolioLang = "es" | "en";
+export type Lang = "es" | "en";
 
-export function normalizeLang(x: unknown): PortfolioLang {
-  return x === "en" ? "en" : "es";
+/** Lee idioma real desde la URL: /en... => en, si no => es */
+export function useLang(): Lang {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/en") ? "en" : "es";
 }
 
 /**
- * Hook: idioma actual desde la URL /:lang
+ * Prefixa una ruta con el idioma, evitando duplicados:
+ * withLang("es", "/work") => "/es/work"
+ * withLang("en", "/es/work") => "/en/work"
+ * withLang("es", "/") => "/es"
  */
-export function useLang(): PortfolioLang {
-  const params = useParams();
-  return normalizeLang(params.lang);
+export function withLang(lang: Lang, path: string): string {
+  const p = (path || "/").startsWith("/") ? path : `/${path}`;
+  const rest = p.replace(/^\/(es|en)(\/|$)/, "/");
+  const cleanRest = rest === "/" ? "" : rest;
+  return `/${lang}${cleanRest}`;
 }
 
-/**
- * Prefija una ruta con el idioma:
- * withLang("es", "/work") -> "/es/work"
- * withLang("en", "about") -> "/en/about"
- */
-export function withLang(lang: PortfolioLang, path: string) {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `/${lang}${p}`;
-}
-
-/**
- * Cambia solo el idioma manteniendo el resto del path.
- * /es/work/oraculo-improv -> /en/work/oraculo-improv
- * /en/about -> /es/about
- */
+/** Cambia idioma manteniendo la misma ruta del portfolio (/es/... <-> /en/...) */
 export function useSwitchLangPath() {
-  const location = useLocation();
-  const params = useParams();
+  const { pathname, search, hash } = useLocation();
 
-  const current = normalizeLang(params.lang);
-  const rest = location.pathname.replace(/^\/(es|en)(\/|$)/, "/"); // deja "/" + lo demás
-
-  return (next: PortfolioLang) => {
-    if (next === current) return location.pathname + location.search + location.hash;
-    const cleanRest = rest.startsWith("/") ? rest : `/${rest}`;
-    return `/${next}${cleanRest}${location.search}${location.hash}`;
+  return (nextLang: Lang) => {
+    const rest = pathname.replace(/^\/(es|en)(\/|$)/, "/");
+    const cleanRest = rest === "/" ? "" : rest;
+    return `/${nextLang}${cleanRest}${search ?? ""}${hash ?? ""}`;
   };
+}
+
+/** Mantiene <html lang="..."> sincronizado con la ruta actual del portfolio */
+export function useHtmlLang() {
+  const lang = useLang();
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 }

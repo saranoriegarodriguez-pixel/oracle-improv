@@ -19,7 +19,13 @@ import Contact from "./pages/portfolio/Contact";
 import CaseStudyOracleImprov from "./pages/portfolio/CaseStudyOracleImprov";
 import CaseStudyGeneric from "./pages/portfolio/CaseStudyGeneric";
 
+// ✅ title dinámico por idioma + sección (portfolio)
+import { useDocumentTitle } from "./pages/portfolio/useDocumentTitle";
+
 export default function App() {
+  // ✅ No lleva args (tu hook no acepta parámetros)
+  useDocumentTitle();
+
   return (
     <Routes>
       {/* ✅ APP: siempre en /app */}
