@@ -1,45 +1,58 @@
 // src/components/Topbar.tsx
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSettings } from "../state/appSettings";
-import { useSwitchLangPath } from "../pages/portfolio/lang";
+import {
+  getPortfolioLang,
+  switchLangPath,
+  type Lang as PortfolioLang,
+} from "../pages/portfolio/lang";
 import "./Topbar.css";
+
+type UiLang = "es" | "en";
 
 export default function Topbar() {
   const nav = useNavigate();
   const loc = useLocation();
   const { st, setLang } = useAppSettings();
 
-  // Estado global (app)
-  const appLang = (st.lang ?? "es") as "es" | "en";
+  // Idioma global (app)
+  const appLang: UiLang = (st.lang ?? "es") as UiLang;
 
-  // Zona
+  // Zona actual
   const inApp = loc.pathname === "/app" || loc.pathname.startsWith("/app/");
-  const inPortfolio = !inApp;
+  const portfolioLang: PortfolioLang = getPortfolioLang(loc.pathname) ?? "es";
+  const inPortfolio = !!getPortfolioLang(loc.pathname);
 
-  // Idioma real del portfolio (sale del pathname)
-  const portfolioLang = (loc.pathname.startsWith("/en") ? "en" : "es") as "es" | "en";
-
-  // Lang “activo” para UI (depende de dónde estés)
-  const lang = inPortfolio ? portfolioLang : appLang;
-
-  // Cambiar idioma manteniendo ruta (solo portfolio)
-  const switchPortfolioPath = useSwitchLangPath();
+  // Idioma “activo” para la UI (depende de dónde estés)
+  const lang: UiLang = inPortfolio ? portfolioLang : appLang;
 
   function goPortfolioHome() {
-    nav(`/${lang}`);
+    nav(`/${portfolioLang}`);
   }
 
   function goAppHome() {
     nav("/app/home");
   }
 
-  function onToggleLang(next: "es" | "en") {
+  function onToggleLang(next: UiLang) {
+    // Portfolio: cambia la ruta (/es/... <-> /en/...)
     if (inPortfolio) {
-      nav(switchPortfolioPath(next));
+      nav(switchLangPath(loc.pathname, next));
       return;
     }
+
+    // App: solo cambia estado (no toca la ruta)
     setLang(next);
   }
+
+  const portfolioBtnDisabled =
+    inPortfolio && (loc.pathname === `/${portfolioLang}` || loc.pathname === `/${portfolioLang}/`);
+
+  const appBtnDisabled =
+    inApp &&
+    (loc.pathname === "/app" ||
+      loc.pathname === "/app/" ||
+      loc.pathname === "/app/home");
 
   return (
     <header className="topbar">
@@ -51,7 +64,7 @@ export default function Topbar() {
           onClick={goPortfolioHome}
           aria-label={lang === "es" ? "Ir al portfolio" : "Go to portfolio"}
           title="Portfolio"
-          disabled={inPortfolio && (loc.pathname === `/${lang}` || loc.pathname.startsWith(`/${lang}/`))}
+          disabled={portfolioBtnDisabled}
         >
           <span className="topbar__icon" aria-hidden>
             🌐
@@ -65,7 +78,7 @@ export default function Topbar() {
           onClick={goAppHome}
           aria-label={lang === "es" ? "Ir a la app" : "Go to app"}
           title="App"
-          disabled={inApp && (loc.pathname === "/app" || loc.pathname === "/app/" || loc.pathname === "/app/home")}
+          disabled={appBtnDisabled}
         >
           <span className="topbar__icon" aria-hidden>
             🏠
@@ -84,6 +97,7 @@ export default function Topbar() {
           >
             ES
           </button>
+
           <button
             className={`pill ${lang === "en" ? "pill--active" : ""}`}
             type="button"
@@ -117,7 +131,7 @@ export default function Topbar() {
               aria-label={lang === "es" ? "Ajustes" : "Settings"}
             >
               <span className="topbar__icon" aria-hidden>
-                ⚙
+                ⚙️
               </span>
             </button>
           </>
