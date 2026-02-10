@@ -3,43 +3,51 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 export type Lang = "es" | "en";
+export const LANGS: Lang[] = ["es", "en"];
 
-/* =========================
-   Utils puros
-========================= */
-
-export function getLangFromPath(pathname: string): Lang {
-  return pathname.startsWith("/en") ? "en" : "es";
+export function getPortfolioLang(pathname: string): Lang | null {
+  const m = pathname.match(/^\/(es|en)(\/|$)/);
+  return (m?.[1] as Lang) ?? null;
 }
 
-export function withLang(lang: Lang, path: string): string {
-  if (path.startsWith("/es") || path.startsWith("/en")) return path;
-  return `/${lang}${path.startsWith("/") ? "" : "/"}${path}`;
+export function stripLangPrefix(pathname: string): string {
+  const lang = getPortfolioLang(pathname);
+  if (!lang) return pathname;
+
+  const rest = pathname.replace(new RegExp(`^\\/${lang}`), "");
+  return rest === "" ? "" : rest;
 }
 
-export function switchLangPath(pathname: string, next: Lang): string {
-  const clean = pathname.replace(/^\/(es|en)/, "");
-  return `/${next}${clean || ""}`;
+export function withLang(lang: Lang, pathAfterLang: string): string {
+  const base = `/${lang}`;
+
+  if (!pathAfterLang) return base;
+
+  const rest = pathAfterLang.startsWith("/") ? pathAfterLang : `/${pathAfterLang}`;
+  return `${base}${rest}`;
 }
 
-/* =========================
-   Hooks (portfolio ONLY)
-========================= */
+export function switchLangPath(pathname: string, nextLang: Lang): string {
+  const current = getPortfolioLang(pathname);
+  if (!current) return `/${nextLang}`;
 
+  const rest = stripLangPrefix(pathname);
+  return withLang(nextLang, rest);
+}
+
+/** Hook: idioma ACTUAL del portfolio (sale de la URL). */
 export function useLang(): Lang {
   const loc = useLocation();
-  return getLangFromPath(loc.pathname);
+  return getPortfolioLang(loc.pathname) ?? "es";
 }
 
+/** Hook: construye la ruta equivalente al cambiar idioma manteniendo el resto. */
 export function useSwitchLangPath() {
   const loc = useLocation();
   return (next: Lang) => switchLangPath(loc.pathname, next);
 }
 
-/**
- * Sincroniza <html lang="..."> con el idioma actual del portfolio.
- * Útil para SEO/accesibilidad.
- */
+/** Hook: sincroniza <html lang="..."> con el idioma del portfolio. */
 export function useHtmlLang() {
   const lang = useLang();
 
