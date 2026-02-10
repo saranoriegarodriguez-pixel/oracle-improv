@@ -1,0 +1,169 @@
+/* src/pages/portfolio/About.css */
+/* About (Portfolio) – Estilo Oracle/Obsidiana */
+
+.pfPage {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 18px 64px;
+}
+
+.pfH1 {
+  margin: 0;
+  font-size: 40px;
+  letter-spacing: 0.2px;
+}
+
+.pfLead {
+  margin: 12px 0 0;
+  max-width: 72ch;
+  color: var(--text2);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.pfP {
+  margin: 12px 0 0;
+  max-width: 76ch;
+  color: rgba(243, 241, 250, 0.92);
+  line-height: 1.7;
+}
+
+/* Layout */
+.pfAbout {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 16px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+@media (max-width: 980px) {
+  .pfAbout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left text block */
+.pfAbout__left {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pfAbout__left::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 25% 18%, rgba(255, 61, 166, 0.14), transparent 55%),
+    radial-gradient(circle at 78% 72%, rgba(240, 213, 138, 0.10), transparent 55%);
+  filter: blur(10px);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.pfAbout__left > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Actions */
+.pfAbout__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+/* Buttons (reuse style if already global) */
+.pfBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--borderStrong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  transition: transform 140ms ease, filter 140ms ease, border-color 140ms ease,
+    background 140ms ease, box-shadow 140ms ease;
+}
+
+.pfBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+.pfBtn--primary {
+  border-color: rgba(255, 61, 166, 0.55);
+  background: rgba(255, 61, 166, 0.16);
+  box-shadow: 0 12px 34px rgba(255, 61, 166, 0.10);
+}
+
+.pfBtn--ghost {
+  border-color: rgba(240, 213, 138, 0.30);
+  background: rgba(240, 213, 138, 0.08);
+}
+
+/* Right portrait */
+.pfAbout__right {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+
+.pfPortrait {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* ✅ si tu imagen no es 16:9, igual respira */
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+.pfPortrait__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* ✅ no recorta */
+  display: block;
+}
+
+.pfPortrait__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 61, 166, 0.16), transparent 55%),
+    radial-gradient(circle at 70% 78%, rgba(240, 213, 138, 0.12), transparent 55%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Accessibility */
+.pfBtn:focus-visible {
+  outline: 2px solid rgba(255, 61, 166, 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfBtn {
+    transition: none;
+  }
+  .pfBtn:hover {
+    transform: none;
+  }
+}

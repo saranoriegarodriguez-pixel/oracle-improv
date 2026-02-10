@@ -1,0 +1,241 @@
+/* src/pages/portfolio/cv.css */
+.cvPage {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px 18px 40px;
+}
+
+.cvTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 14px;
+}
+
+.cvBack {
+  color: var(--text2);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cvBack:hover {
+  filter: brightness(1.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.cvBtn {
+  border: 1px solid rgba(255, 61, 166, 0.35);
+  background: rgba(255, 61, 166, 0.14);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 900;
+}
+.cvBtn:hover {
+  filter: brightness(1.06);
+}
+
+.cvSheet {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.cvHeader {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 18px;
+  align-items: start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+@media (max-width: 860px) {
+  .cvHeader {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cvName {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: 0.2px;
+}
+
+.cvRole {
+  margin-top: 6px;
+  color: var(--text2);
+  line-height: 1.55;
+}
+
+.cvMini {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 12px;
+}
+
+.cvMini__line {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text2);
+}
+.cvMini__k {
+  color: var(--muted);
+}
+
+.cvMini a {
+  color: var(--text);
+  text-decoration: none;
+}
+.cvMini a:hover {
+  text-decoration: underline;
+}
+
+.cvGrid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 18px;
+  padding-top: 16px;
+}
+
+@media (max-width: 860px) {
+  .cvGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cvBlock {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 14px 14px 10px;
+}
+
+.cvH2 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--goldSoft);
+}
+
+.cvP {
+  margin: 0 0 14px;
+  color: var(--text2);
+  line-height: 1.65;
+}
+
+.cvList {
+  margin: 0 0 12px 18px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+.cvItem {
+  margin-bottom: 14px;
+}
+
+.cvItem__title {
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.cvItem__body {
+  color: var(--text2);
+  line-height: 1.65;
+}
+
+.cvTag {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(214, 178, 94, 0.28);
+  background: rgba(214, 178, 94, 0.10);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cvLinks a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+.cvLinks a:hover {
+  border-bottom-color: rgba(255, 61, 166, 0.6);
+}
+
+.cvNote {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ✅ PRINT / PDF PRO */
+@media print {
+  .topbar,
+  .cvTop {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .cvSheet,
+  .cvBlock,
+  .cvMini {
+    background: white !important;
+    box-shadow: none !important;
+    border-color: #ddd !important;
+  }
+
+  .cvName,
+  .cvItem__title {
+    color: black !important;
+  }
+
+  .cvRole,
+  .cvP,
+  .cvItem__body,
+  .cvList,
+  .cvMini__line,
+  .cvMini__k,
+  .cvNote {
+    color: #222 !important;
+  }
+
+  .cvH2 {
+    color: #111 !important;
+  }
+
+  a {
+    color: #111 !important;
+    text-decoration: none !important;
+  }
+
+  .cvTag {
+    border-color: #bbb !important;
+    background: #f5f5f5 !important;
+    color: #111 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+}

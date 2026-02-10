@@ -1,0 +1,189 @@
+/* src/pages/portfolio/Work.css */
+/* Work (Portfolio) – Estilo Oracle/Obsidiana */
+
+.pfPage {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 18px 64px;
+}
+
+.pfH1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: 0.2px;
+}
+
+.pfLead {
+  margin: 10px 0 0;
+  max-width: 78ch;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* GRID de proyectos */
+.pfWorkGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 920px) {
+  .pfWorkGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* CARD */
+.pfWorkCard {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32);
+  transition: transform 140ms ease, filter 140ms ease, border-color 140ms ease;
+}
+
+.pfWorkCard:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  border-color: rgba(255, 61, 166, 0.22);
+}
+
+/* MEDIA 16:9 (NO RECORTA) */
+.pfWorkCard__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(0, 0, 0, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.pfWorkCard__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* ✅ no recorta */
+  display: block;
+}
+
+/* glow/velo */
+.pfWorkCard__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 28% 25%, rgba(255, 61, 166, 0.14), transparent 55%),
+    radial-gradient(circle at 72% 78%, rgba(240, 213, 138, 0.10), transparent 55%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Badge “coming soon” */
+.pfWorkCard__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(214, 178, 94, 0.32);
+  background: rgba(214, 178, 94, 0.14);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(6px);
+}
+
+/* BODY */
+.pfWorkCard__body {
+  padding: 12px 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.pfWorkCard__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pfWorkCard__title {
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+.pfWorkCard__year {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* tagline */
+.pfWorkCard__tagline {
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* tags */
+.pfWorkCard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* CTA */
+.pfWorkCard__cta {
+  margin-top: 4px;
+}
+
+/* Badge reusable */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.badge--accent {
+  border-color: rgba(255, 61, 166, 0.50);
+  background: rgba(255, 61, 166, 0.14);
+  color: var(--text);
+}
+
+/* Pills (si no tienes una global, esto cubre) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* Accesibilidad */
+.pfWorkCard:focus-visible {
+  outline: 2px solid rgba(255, 61, 166, 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfWorkCard {
+    transition: none;
+  }
+  .pfWorkCard:hover {
+    transform: none;
+  }
+}

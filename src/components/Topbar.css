@@ -1,106 +1,124 @@
 /* src/components/Topbar.css */
 
-.topbar{
+.topbar {
   position: sticky;
   top: 0;
-  z-index: 50;
-  padding: 12px 12px;
-  padding-top: calc(12px + env(safe-area-inset-top));
-  background: rgba(10,10,14,.55);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  z-index: 80;
+  width: 100%;
+  background: rgba(7, 6, 11, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.topbar__inner{
-  max-width: 1100px;
+.topbar__inner {
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.topbar__spacer{ flex: 1; }
-
-/* ✅ Icon buttons (🌐 🏠 👤 ⚙) */
-.topbar__iconBtn{
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.22);
-  color: var(--text);
-  cursor: pointer;
-  transition: transform .08s ease, border-color .12s ease, background .12s ease;
+.topbar__left {
+  display: flex;
+  gap: 10px;
 }
 
-.topbar__iconBtn:hover{
-  border-color: rgba(255,61,166,.35);
+.topbar__spacer {
+  flex: 1;
+}
+
+.topbar__iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  width: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.topbar__iconBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
   transform: translateY(-1px);
 }
 
-.topbar__iconBtn:disabled{
-  opacity: .55;
+.topbar__iconBtn:disabled {
+  opacity: 0.45;
   cursor: default;
   transform: none;
 }
 
-.topbar__icon{
-  font-size: 18px;
-  line-height: 1;
+.topbar__icon {
+  font-size: 16px;
 }
 
-/* Perfil y Ajustes: toque distinto */
-.topbar__iconBtn--settings{
-  border-color: rgba(214,178,94,.35);
-  background: rgba(214,178,94,.10);
-  color: var(--goldSoft);
-}
-
-.topbar__iconBtn--settings:hover{
-  border-color: rgba(255,61,166,.35);
-  background: rgba(255,61,166,.10);
-  color: var(--text);
-}
-
-/* Lang pills */
-.topbar__lang{
+.topbar__nav {
   display: flex;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.18);
+  gap: 8px;
+  align-items: center;
+  padding: 0 6px;
 }
 
-.pill{
-  padding: 8px 10px;
-  border-radius: 10px;
+.topbar__navLink {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text2);
   cursor: pointer;
-  font-weight: 900;
-  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
-.pill--active{
-  border-color: rgba(255,61,166,.55);
-  background: rgba(255,61,166,.12);
+.topbar__navLink:hover {
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text);
 }
 
-/* ✅ Focus visible (accesible y pro) */
-.topbar__iconBtn:focus-visible,
-.pill:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255,61,166,.18);
-  border-color: rgba(255,61,166,.45);
+.topbar__navLink.is-active {
+  background: rgba(255, 61, 166, 0.10);
+  border-color: rgba(255, 61, 166, 0.22);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(255, 61, 166, 0.10) inset;
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce){
-  .topbar__iconBtn,
-  .pill{ transition: none !important; }
+.topbar__lang {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pill {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text2);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.pill--active {
+  background: rgba(255, 61, 166, 0.14);
+  border-color: rgba(255, 61, 166, 0.28);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(255, 61, 166, 0.10) inset;
+}
+
+.topbar__appBtns {
+  display: flex;
+  gap: 10px;
+  margin-left: 6px;
 }

@@ -1,58 +1,36 @@
 // src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
-import "./App.css";
 
-// APP
-import AppShell from "./pages/app/AppShell";
-import Home from "./pages/app/Home";
-import Scene from "./pages/app/Scene";
-import Session from "./pages/app/Session";
-import Profile from "./pages/app/Profile";
-import Settings from "./pages/app/Settings";
-
-// PORTFOLIO
-import PortfolioLayout from "./pages/portfolio/PortfolioLayout";
-import PortfolioHome from "./pages/portfolio/PortfolioHome";
-import PortfolioWork from "./pages/portfolio/PortfolioWork";
+// Portfolio (web)
+import Home from "./pages/portfolio/Home";
+import Work from "./pages/portfolio/Work";
 import About from "./pages/portfolio/About";
 import Contact from "./pages/portfolio/Contact";
-import CaseStudyOracleImprov from "./pages/portfolio/CaseStudyOracleImprov";
-import CaseStudyGeneric from "./pages/portfolio/CaseStudyGeneric";
+import CV from "./pages/portfolio/CV";
+import ProjectPage from "./pages/portfolio/ProjectPage";
 
-// ✅ title dinámico por idioma + sección (portfolio)
-import { useDocumentTitle } from "./pages/portfolio/useDocumentTitle";
+// App (tu app interna)
+import AppShell from "./pages/app/AppShell";
 
 export default function App() {
-  // ✅ No lleva args (tu hook no acepta parámetros)
-  useDocumentTitle();
-
   return (
     <Routes>
-      {/* ✅ APP: siempre en /app */}
-      <Route path="/app" element={<AppShell />}>
-        <Route index element={<Navigate to="/app/home" replace />} />
-        <Route path="home" element={<Home />} />
-        <Route path="scene" element={<Scene />} />
-        <Route path="session" element={<Session />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
+      {/* ✅ WEB / PORTFOLIO */}
+      <Route path="/" element={<Home />} />
 
-      {/* ✅ PORTFOLIO bilingüe */}
-      <Route path="/:lang(es|en)" element={<PortfolioLayout />}>
-        <Route index element={<PortfolioHome />} />
+      {/* Work: lista + detalle */}
+      <Route path="/work" element={<Work />} />
+      <Route path="/work/:slug" element={<ProjectPage />} />
 
-        <Route path="work" element={<PortfolioWork />} />
-        <Route path="work/oraculo-improv" element={<CaseStudyOracleImprov />} />
-        <Route path="work/:slug" element={<CaseStudyGeneric />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/cv" element={<CV />} />
 
-        <Route path="about" element={<About />} />
-        <Route path="contact" element={<Contact />} />
-      </Route>
+      {/* ✅ APP */}
+      <Route path="/app/*" element={<AppShell />} />
 
-      {/* ✅ Entrypoints */}
-      <Route path="/" element={<Navigate to="/es" replace />} />
-      <Route path="*" element={<Navigate to="/es" replace />} />
+      {/* fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
