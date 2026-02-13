@@ -35,14 +35,14 @@ export const MAX_TOKENS_TRIAL = num(process.env.MAX_TOKENS_TRIAL);
 export const MAX_OUTPUT_TOKENS = num(process.env.MAX_OUTPUT_TOKENS);
 
 // ===============================
-// Usage / limits  (🔥 lo que rompía Usage)
+// Usage / limits
 // ===============================
 export const MAX_SESSIONS_PER_DAY = num(process.env.MAX_SESSIONS_PER_DAY, 10);
 export const SESSION_DURATION_MINUTES = num(process.env.SESSION_DURATION_MINUTES, 8);
 export const MAX_MESSAGES_PER_SESSION = num(process.env.MAX_MESSAGES_PER_SESSION, 50);
 
 // ===============================
-// Rate limit (mínimo para que no falle)
+// Rate limit
 // ===============================
 export const RATE_LIMIT_MAX_REQ = num(process.env.RATE_LIMIT_MAX_REQ, 120);
 export const RATE_LIMIT_WINDOW_SEC = num(process.env.RATE_LIMIT_WINDOW_SEC, 60);
@@ -68,3 +68,8 @@ export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 export const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "";
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "";
+
+// ===============================
+// Session / Cookies
+// ===============================
+export const SESSION_SECRET = process.env.SESSION_SECRET || "";

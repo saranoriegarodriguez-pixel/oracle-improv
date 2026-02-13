@@ -1,8 +1,11 @@
 // server/index.ts
 import express from "express";
 import cors from "cors";
+import session from "express-session";
+import passport from "passport";
 
-import { PORT, CORS_ORIGIN } from "./env";
+import "./auth/googleStrategy"; // 🔥 importante: carga la estrategia
+import { PORT, CORS_ORIGIN, SESSION_SECRET } from "./env";
 
 import { googleAuthRouter } from "./routes/googleAuth";
 import { apiRouter } from "./routes/api";
@@ -19,14 +22,27 @@ app.use(
   })
 );
 
+// 🔥 Necesario para mantener la sesión del usuario
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// 🔥 Necesario para Google OAuth
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
 // Rutas
-app.use(googleAuthRouter);
-app.use("/api", apiRouter);       // ✅ /api/evaluate + /api/characterPrompt
-app.use("/api", usageRouter);     // ✅ /api/usage/:username
+app.use("/auth", googleAuthRouter); // 🔥 ahora todo queda bajo /auth
+app.use("/api", apiRouter);
+app.use("/api", usageRouter);
 
 app.listen(Number(PORT), () => {
   console.log(`🚀 Server running on port ${PORT}`);

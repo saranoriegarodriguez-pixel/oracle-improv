@@ -1,7 +1,6 @@
-// server/budget.ts
-import { Router } from "express";
-import { USD_PER_EUR } from "./env";
-import { getBudgetStatus } from "./store/budgetStore";
+import { Router, type Request, type Response } from "express";
+import { USD_PER_EUR } from "./env.js";
+import { getBudgetStatus } from "./store/budgetStore.js";
 
 export const budgetRouter = Router();
 
@@ -9,8 +8,10 @@ export const budgetRouter = Router();
  * GET /api/budget/:username
  * Devuelve gasto mensual estimado (en USD y EUR) y límite/cutoff configurados.
  */
-budgetRouter.get("/budget/:username", (req, res) => {
-  const username = String(req.params.username ?? "").trim().toLowerCase();
+budgetRouter.get("/budget/:username", (req: Request, res: Response) => {
+  const username = String(req.params.username ?? "")
+    .trim()
+    .toLowerCase();
 
   // usamos la misma convención que limits/budget guard
   const ownerKey = username ? `user:${username}` : "ip:unknown";
@@ -19,7 +20,8 @@ budgetRouter.get("/budget/:username", (req, res) => {
 
   const usdPerEur = Number(USD_PER_EUR || 1);
 
-  const eurSpent = usdPerEur > 0 ? st.usdSpent / usdPerEur : st.usdSpent;
+  const eurSpent =
+    usdPerEur > 0 ? st.usdSpent / usdPerEur : st.usdSpent;
 
   res.json({
     username,
@@ -34,7 +36,9 @@ budgetRouter.get("/budget/:username", (req, res) => {
     eurCutoff: st.eurCutoff,
 
     // para UI
-    remainingToCutoffEur: Number(Math.max(0, st.eurCutoff - eurSpent).toFixed(6)),
+    remainingToCutoffEur: Number(
+      Math.max(0, st.eurCutoff - eurSpent).toFixed(6)
+    ),
     overCutoff: eurSpent >= st.eurCutoff,
   });
 });
