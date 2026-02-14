@@ -1,44 +1,47 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import Home from "./pages/Home";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
+// Portfolio (web)
+import Home from "./pages/portfolio/Home";
+import Work from "./pages/portfolio/Work";
+import About from "./pages/portfolio/About";
+import Contact from "./pages/portfolio/Contact";
+import CV from "./pages/portfolio/CV";
+import ProjectPage from "./pages/portfolio/ProjectPage";
 
+// Auth (login/guard)
 import Login from "./pages/auth/Login";
 import RequireAuth from "./pages/auth/RequireAuth";
-import AppShell from "./pages/app/AppShell";
 
-// tus páginas internas
-import Scene from "./pages/Scene";
-import Session from "./pages/session/Session"; // ajusta ruta real
+// App interna
+import AppShell from "./pages/app/AppShell";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* públicas */}
-        <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/login" element={<Login />} />
+    <Routes>
+      {/* 🌐 WEB / PORTFOLIO */}
+      <Route path="/" element={<Home />} />
+      <Route path="/work" element={<Work />} />
+      <Route path="/work/:slug" element={<ProjectPage />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/cv" element={<CV />} />
 
-        {/* protegidas */}
-        <Route
-          path="/app"
-          element={
-            <RequireAuth>
-              <AppShell />
-            </RequireAuth>
-          }
-        >
-          <Route index element={<Scene />} />
-          <Route path="session" element={<Session />} />
-        </Route>
+      {/* 🔐 LOGIN (global) */}
+      <Route path="/login" element={<Login />} />
 
-        {/* fallback simple */}
-        <Route path="*" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
+      {/* 🔮 APP (privada) */}
+      <Route
+        path="/app/*"
+        element={
+          <RequireAuth>
+            <AppShell />
+          </RequireAuth>
+        }
+      />
+
+      {/* fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
