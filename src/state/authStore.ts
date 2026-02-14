@@ -1,30 +1,19 @@
 // src/state/authStore.ts
 import { create } from "zustand";
-
-export type AuthUser = {
-  email?: string;
-  name?: string;
-  picture?: string;
-  verified_email?: boolean;
-};
-
-type AuthStatus = "unknown" | "loading" | "authed" | "guest";
+import type { AuthStatus, AuthUser, AuthMeResponse } from "./authTypes";
 
 type AuthState = {
   status: AuthStatus;
   user: AuthUser | null;
 
-  // Acciones
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
-async function safeJson<T>(r: Response): Promise<T | null> {
-  try {
-    return (await r.json()) as T;
-  } catch {
-    return null;
-  }
+async function fetchMe(): Promise<AuthMeResponse> {
+  const r = await fetch("/api/auth/me", { credentials: "include" });
+  if (!r.ok) return { ok: false };
+  return (await r.json()) as AuthMeResponse;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -32,26 +21,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
 
   refresh: async () => {
-    const cur = get().status;
-    if (cur === "loading") return;
+    // evita llamadas duplicadas si ya estás cargando
+    if (get().status === "loading") return;
 
     set({ status: "loading" });
-
     try {
-      const r = await fetch("/api/auth/me", { credentials: "include" });
-      if (!r.ok) {
-        set({ status: "guest", user: null });
-        return;
-      }
-
-      const data = await safeJson<{ ok: boolean; user?: AuthUser }>(r);
-      if (data?.ok) {
+      const data = await fetchMe();
+      if (data.ok) {
         set({ status: "authed", user: data.user ?? null });
       } else {
-        set({ status: "guest", user: null });
+        set({ status: "anon", user: null });
       }
     } catch {
-      set({ status: "guest", user: null });
+      // si falla, mejor considerarlo anon (no bloquea la app)
+      set({ status: "anon", user: null });
     }
   },
 
@@ -64,7 +47,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       // ignore
     } finally {
-      set({ status: "guest", user: null });
+      set({ status: "anon", user: null });
     }
   },
 }));

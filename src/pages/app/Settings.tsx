@@ -11,6 +11,8 @@ import { useAppSettings } from "../../state/appSettings";
 import { loadUsername, saveUsername, resetSkillPoints } from "../../state/profileStore";
 import { clearSummaries } from "../../state/profileSummaries";
 
+// ✅ Google auth (zustand)
+import { useAuthStore } from "../../state/authStore";
 
 type Lang = "es" | "en";
 type AiProvider = "ollama" | "openai";
@@ -27,11 +29,24 @@ export default function Settings() {
 
   const aiProvider: AiProvider = (st.aiProvider ?? "ollama") as AiProvider;
 
-  // ---------------- Username ----------------
+  // ✅ Auth
+  const auth = useAuthStore();
+  const email = auth.user?.email ? String(auth.user.email).trim().toLowerCase() : "";
+  const isAuthed = auth.status === "authed" && !!email;
+
+  // ---------------- Username (alias local) ----------------
   const [username, setUsername] = useState("");
 
   useEffect(() => {
     setUsername(loadUsername());
+  }, []);
+
+  // refrescar sesión al entrar en Settings (para mostrar estado Google fiable)
+  useEffect(() => {
+    if (auth.status === "unknown") {
+      void auth.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const t = useMemo(() => {
@@ -59,9 +74,24 @@ export default function Settings() {
         ? "Usará OpenAI (por ejemplo GPT-5 mini) en /api/chat y /api/evaluate."
         : "Uses OpenAI (e.g. GPT-5 mini) in /api/chat and /api/evaluate.",
 
-      username: es ? "Nombre de usuario" : "Username",
-      usernameHint: es ? "Este nombre se muestra en tu perfil." : "This name is shown in your profile.",
+      // ✅ Renombrado a “Nombre escénico”
+      username: es ? "Nombre escénico" : "Stage name",
+      usernameHint: es
+        ? "Se muestra en tu perfil y en el chat. No es tu email."
+        : "Shown in your profile and chat. It's not your email.",
       usernamePh: es ? "Tu nombre…" : "Your name…",
+
+      // ✅ Google section
+      googleTitle: es ? "Cuenta Google" : "Google account",
+      googleConnected: es ? "Conectada" : "Connected",
+      googleNotConnected: es ? "No conectada" : "Not connected",
+      googleEmailLabel: es ? "Email" : "Email",
+      googleNameLabel: es ? "Nombre" : "Name",
+      googleRefresh: es ? "Actualizar estado" : "Refresh status",
+      googleLogout: es ? "Cerrar sesión" : "Logout",
+      googleHint: es
+        ? "Google se usa para habilitar OpenAI y aplicar límites por usuario (email)."
+        : "Google is used to enable OpenAI and enforce per-user limits (email).",
 
       // ✅ Reset SOLO skills + Oráculo (no username, no usos)
       resetAll: es ? "Reset progreso" : "Reset progress",
@@ -130,10 +160,7 @@ export default function Settings() {
     const ok = window.confirm(t.confirmResetAll);
     if (!ok) return;
 
-    // ✅ SOLO barras (skills)
     resetSkillPoints();
-
-    // ✅ SOLO consejos del Oráculo (últimas 10 sesiones)
     clearSummaries();
 
     window.alert(t.resetAllDone);
@@ -144,7 +171,6 @@ export default function Settings() {
       <div className="settings__panel">
         {/* Fila: Idioma + Nivel */}
         <div className="settings__row2">
-          {/* ✅ IMPORTANTE: pasar genérico para que onChange NO sea string */}
           <Select<Lang>
             label={t.language}
             value={lang}
@@ -160,6 +186,55 @@ export default function Settings() {
             options={levelOptions}
             placeholder={t.selectPh}
           />
+        </div>
+
+        {/* ✅ Cuenta Google (siempre visible) */}
+        <div className="settings__group">
+          <div className="settings__label">{t.googleTitle}</div>
+
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <span className="badge" style={{ opacity: 0.95 }}>
+              {isAuthed ? t.googleConnected : t.googleNotConnected}
+            </span>
+
+            <button
+              className="settings__btn"
+              type="button"
+              onClick={() => void auth.refresh()}
+              disabled={auth.status === "loading"}
+              title={t.googleRefresh}
+            >
+              {t.googleRefresh}
+            </button>
+
+            {isAuthed && (
+              <button
+                className="settings__danger"
+                type="button"
+                onClick={() => void auth.logout()}
+                disabled={auth.status === "loading"}
+              >
+                {t.googleLogout}
+              </button>
+            )}
+          </div>
+
+          {isAuthed && (
+            <div style={{ marginTop: 10 }}>
+              <div className="settings__hint">
+                <strong>{t.googleEmailLabel}:</strong> {email}
+              </div>
+              {!!auth.user?.name && (
+                <div className="settings__hint">
+                  <strong>{t.googleNameLabel}:</strong> {auth.user.name}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="settings__hint" style={{ marginTop: 8 }}>
+            {t.googleHint}
+          </div>
         </div>
 
         {/* Master (solo DEV) */}
@@ -208,10 +283,19 @@ export default function Settings() {
             <div className="settings__hint" style={{ marginTop: 8 }}>
               {aiProvider === "openai" ? t.aiHintOpenAI : t.aiHintOllama}
             </div>
+
+            {/* Mini aviso UX: OpenAI necesita login */}
+            {aiProvider === "openai" && !isAuthed && (
+              <div className="settings__hint" style={{ marginTop: 8, opacity: 0.95 }}>
+                {lang === "es"
+                  ? "Aviso: OpenAI requiere iniciar sesión con Google."
+                  : "Note: OpenAI requires Google login."}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Nombre de usuario */}
+        {/* ✅ Nombre escénico */}
         <div className="settings__group">
           <div className="settings__label">{t.username}</div>
           <input

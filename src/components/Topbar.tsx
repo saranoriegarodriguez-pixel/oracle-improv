@@ -1,177 +1,105 @@
 // src/components/Topbar.tsx
 import { useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Topbar.css";
 
 import { useAppSettings } from "../state/appSettings";
+import { useAuthStore } from "../state/authStore";
 
 type Lang = "es" | "en";
 
 export default function Topbar() {
-  const nav = useNavigate();
+  const navigate = useNavigate();
   const loc = useLocation();
-  const { st, setLang } = useAppSettings();
 
-  const lang: Lang = (st.lang ?? "es") as Lang;
+  const { st } = useAppSettings() as any;
+  const lang: Lang = (st?.lang ?? "es") as Lang;
 
-  const inApp = loc.pathname === "/app" || loc.pathname.startsWith("/app/");
-  const inCV = loc.pathname === "/cv";
-  const inWork = loc.pathname === "/work" || loc.pathname.startsWith("/work/");
-  const inAbout = loc.pathname === "/about";
-  const inContact = loc.pathname === "/contact";
+  const auth = useAuthStore();
+  const authed = auth.status === "authed";
+  const displayName = auth.user?.name || auth.user?.email || "";
 
   const t = useMemo(() => {
-    return lang === "es"
-      ? {
-          web: "Web",
-          app: "App",
-          work: "Proyectos",
-          about: "Sobre mí",
-          contact: "Contacto",
-          cv: "CV",
-          profile: "Perfil",
-          settings: "Ajustes",
-        }
-      : {
-          web: "Web",
-          app: "App",
-          work: "Work",
-          about: "About",
-          contact: "Contact",
-          cv: "CV",
-          profile: "Profile",
-          settings: "Settings",
-        };
+    const es = lang === "es";
+    return {
+      home: es ? "Home" : "Home",
+      profile: es ? "Perfil" : "Profile",
+      settings: es ? "Settings" : "Settings",
+      login: es ? "Entrar" : "Login",
+      logout: es ? "Salir" : "Logout",
+      ariaLogout: es ? "Cerrar sesión" : "Log out",
+    };
   }, [lang]);
 
-  function goWebHome() {
-    nav("/");
-  }
+  const inApp = loc.pathname.startsWith("/app") || loc.pathname === "/profile" || loc.pathname === "/settings";
 
-  function goAppHome() {
-    nav("/app/home");
-  }
-
-  function onToggleLang(next: Lang) {
-    setLang(next);
+  async function handleLogout() {
+    try {
+      await auth.logout(); // ✅ llama /api/auth/logout y refresca /api/auth/me
+    } finally {
+      // al salir, te mando a login si estabas en /app
+      if (inApp) navigate("/login", { replace: true });
+    }
   }
 
   return (
     <header className="topbar">
       <div className="topbar__inner">
-        {/* Left: Web + App quick buttons */}
         <div className="topbar__left">
           <button
-            className="topbar__iconBtn"
+            className="topbar__brand"
             type="button"
-            onClick={goWebHome}
-            title={t.web}
-            aria-label={t.web}
-            disabled={!inApp && loc.pathname === "/"}
+            onClick={() => navigate("/")}
+            aria-label="Oracle Improv"
+            title="Oracle Improv"
           >
-            <span className="topbar__icon" aria-hidden>
-              🌐
-            </span>
+            <span className="topbar__brandDot" aria-hidden />
+            <span className="topbar__brandText">Oracle</span>
           </button>
 
-          <button
-            className="topbar__iconBtn"
-            type="button"
-            onClick={goAppHome}
-            title={t.app}
-            aria-label={t.app}
-            disabled={inApp && (loc.pathname === "/app" || loc.pathname === "/app/home")}
-          >
-            <span className="topbar__icon" aria-hidden>
-              🏛️
-            </span>
-          </button>
-        </div>
-
-        {/* Center: portfolio nav only when NOT in /app */}
-        {!inApp && (
-          <nav className="topbar__nav" aria-label="Portfolio">
-            <button
-              className={`topbar__navLink ${inWork ? "is-active" : ""}`}
-              type="button"
-              onClick={() => nav("/work")}
-            >
-              {t.work}
-            </button>
-            <button
-              className={`topbar__navLink ${inAbout ? "is-active" : ""}`}
-              type="button"
-              onClick={() => nav("/about")}
-            >
-              {t.about}
-            </button>
-            <button
-              className={`topbar__navLink ${inContact ? "is-active" : ""}`}
-              type="button"
-              onClick={() => nav("/contact")}
-            >
-              {t.contact}
-            </button>
-            <button
-              className={`topbar__navLink ${inCV ? "is-active" : ""}`}
-              type="button"
-              onClick={() => nav("/cv")}
-            >
-              {t.cv}
-            </button>
+          <nav className="topbar__nav" aria-label="Primary">
+            <NavLink className="topbar__link" to="/">
+              {t.home}
+            </NavLink>
+            <NavLink className="topbar__link" to="/profile">
+              {t.profile}
+            </NavLink>
+            <NavLink className="topbar__link" to="/settings">
+              {t.settings}
+            </NavLink>
           </nav>
-        )}
-
-        <div className="topbar__spacer" />
-
-        {/* Language pills always visible */}
-        <div className="topbar__lang" role="group" aria-label="Language">
-          <button
-            className={`pill ${lang === "es" ? "pill--active" : ""}`}
-            type="button"
-            onClick={() => onToggleLang("es")}
-            aria-pressed={lang === "es"}
-          >
-            ES
-          </button>
-          <button
-            className={`pill ${lang === "en" ? "pill--active" : ""}`}
-            type="button"
-            onClick={() => onToggleLang("en")}
-            aria-pressed={lang === "en"}
-          >
-            EN
-          </button>
         </div>
 
-        {/* Right: app-only buttons */}
-        {inApp && (
-          <div className="topbar__appBtns" aria-label="App actions">
-            <button
-              className="topbar__iconBtn topbar__iconBtn--profile"
-              type="button"
-              onClick={() => nav("/app/profile")}
-              title={t.profile}
-              aria-label={t.profile}
-            >
-              <span className="topbar__icon" aria-hidden>
-                👤
-              </span>
-            </button>
+        <div className="topbar__right">
+          {/* Badge usuario (solo si authed) */}
+          {authed && displayName ? (
+            <div className="topbar__user" title={displayName}>
+              <span className="topbar__userDot" aria-hidden />
+              <span className="topbar__userText">{displayName}</span>
+            </div>
+          ) : null}
 
+          {/* Botón login / logout */}
+          {authed ? (
             <button
-              className="topbar__iconBtn topbar__iconBtn--settings"
+              className="topbar__iconBtn"
               type="button"
-              onClick={() => nav("/app/settings")}
-              title={t.settings}
-              aria-label={t.settings}
+              onClick={handleLogout}
+              aria-label={t.ariaLogout}
+              title={t.logout}
             >
-              <span className="topbar__icon" aria-hidden>
-                ⚙️
-              </span>
+              🚪
             </button>
-          </div>
-        )}
+          ) : (
+            <button
+              className="topbar__btn"
+              type="button"
+              onClick={() => navigate(`/login?next=${encodeURIComponent(loc.pathname + loc.search)}`)}
+            >
+              {t.login}
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

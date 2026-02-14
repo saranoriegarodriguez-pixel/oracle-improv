@@ -1,45 +1,30 @@
 // src/pages/auth/RequireAuth.tsx
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../state/authStore";
 
-type Props = { children: React.ReactNode };
-
-export default function RequireAuth({ children }: Props) {
-  const loc = useLocation();
+export default function RequireAuth({ children }: { children: React.ReactNode }) {
   const auth = useAuthStore();
-  const [checked, setChecked] = useState(false);
+  const loc = useLocation();
 
   useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      try {
-        // Si ya está authed, listo
-        if (auth.status === "authed") {
-          if (alive) setChecked(true);
-          return;
-        }
-
-        await auth.refresh();
-        if (alive) setChecked(true);
-      } catch {
-        if (alive) setChecked(true);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
+    if (auth.status === "unknown") {
+      void auth.refresh();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Loader mínimo
-  if (!checked || auth.status === "unknown" || auth.status === "loading") return null;
+  if (auth.status === "unknown" || auth.status === "loading") {
+    return (
+      <div style={{ padding: 20, opacity: 0.85 }}>
+        Cargando sesión…
+      </div>
+    );
+  }
 
   if (auth.status !== "authed") {
-    const next = encodeURIComponent(loc.pathname + loc.search);
-    return <Navigate to={`/login?next=${next}`} replace />;
+    const next = loc.pathname + loc.search;
+    return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
   }
 
   return <>{children}</>;

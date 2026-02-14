@@ -12,9 +12,21 @@ import type { PlayerLevel, SkillKey } from "../../../shared/types";
 
 import jsPDF from "jspdf";
 
-import { fetchBudget, type BudgetResponse } from "../../api/budget";
+// ✅ auth (Google) como “owner real”
+import { useAuthStore } from "../../state/authStore";
 
 type Lang = "es" | "en";
+
+type BudgetResponse = {
+  username: string;
+  monthKey: string;
+  usdSpent: number;
+  eurSpent: number;
+  eurBudget: number;
+  eurCutoff: number;
+  remainingToCutoffEur: number;
+  overCutoff: boolean;
+};
 
 const SKILLS: SkillKey[] = ["clarity", "desire", "listening", "status", "ending"];
 
@@ -43,6 +55,15 @@ function formatDate(ts: number, lang: Lang) {
   }
 }
 
+// ✅ Budget fetch con cookie sid
+async function fetchBudget(ownerUsername: string): Promise<BudgetResponse> {
+  const res = await fetch(`/api/budget/${encodeURIComponent(ownerUsername)}`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(await res.text().catch(() => "budget fetch failed"));
+  return (await res.json()) as BudgetResponse;
+}
+
 export default function Profile() {
   const { st } = useAppSettings() as any;
 
@@ -52,8 +73,18 @@ export default function Profile() {
   const aiProvider = (st.aiProvider ?? "ollama") as "ollama" | "openai";
   const isOpenAI = aiProvider === "openai";
 
-  // ✅ Nombre viene del Settings (saveUsername / loadUsername)
-  const username = loadUsername() || (lang === "es" ? "Sin nombre" : "Unnamed");
+  // ✅ auth store
+  const auth = useAuthStore();
+  const authedEmail =
+    auth.status === "authed" && auth.user?.email
+      ? String(auth.user.email).trim().toLowerCase()
+      : "";
+
+  // ✅ Nickname visible (editable en Settings)
+  const nickname = loadUsername() || (lang === "es" ? "Sin nombre" : "Unnamed");
+
+  // ✅ Owner real para límites/presupuesto/usage
+  const ownerUsername = authedEmail || nickname;
 
   const selectedLevel = (st.level ?? "apprentice") as PlayerLevel;
 
@@ -61,9 +92,7 @@ export default function Profile() {
     const es = lang === "es";
     return {
       title: es ? "Perfil" : "Profile",
-      subtitle: es
-        ? "Tu progreso local y el estado del Oráculo."
-        : "Your local progress and the Oracle status.",
+      subtitle: es ? "Tu progreso local y el estado del Oráculo." : "Your local progress and the Oracle status.",
 
       recommended: es ? "Nivel recomendado" : "Recommended level",
       selected: es ? "Seleccionado" : "Selected",
@@ -164,9 +193,7 @@ export default function Profile() {
 
   async function refreshBudget() {
     if (!isOpenAI) return;
-
-    const uname = (loadUsername() || "").trim();
-    if (!uname) {
+    if (!ownerUsername.trim()) {
       setBudget(null);
       setBudgetErr("");
       return;
@@ -174,7 +201,7 @@ export default function Profile() {
 
     setBudgetRefreshing(true);
     try {
-      const b = await fetchBudget(uname);
+      const b = await fetchBudget(ownerUsername.trim());
       setBudget(b);
       setBudgetErr("");
     } catch (e: any) {
@@ -195,15 +222,14 @@ export default function Profile() {
         return;
       }
 
-      const uname = (loadUsername() || "").trim();
-      if (!uname) {
+      if (!ownerUsername.trim()) {
         setBudget(null);
         setBudgetErr("");
         return;
       }
 
       try {
-        const b = await fetchBudget(uname);
+        const b = await fetchBudget(ownerUsername.trim());
         if (!cancelled) {
           setBudget(b);
           setBudgetErr("");
@@ -220,7 +246,7 @@ export default function Profile() {
     return () => {
       cancelled = true;
     };
-  }, [isOpenAI]);
+  }, [isOpenAI, ownerUsername]);
 
   // -------------------------
   // ✨ Animación "bump" + skill mejorada
@@ -319,7 +345,7 @@ export default function Profile() {
     })();
 
     const title = t.pdfTitle;
-    const userLine = `${lang === "es" ? "Usuario" : "User"}: ${username}`;
+    const userLine = `${lang === "es" ? "Usuario" : "User"}: ${nickname}`;
     const dateLine = nowStr ? `${lang === "es" ? "Fecha" : "Date"}: ${nowStr}` : "";
 
     let y = topY;
@@ -391,11 +417,7 @@ export default function Profile() {
         );
 
         if (s.recommendation) {
-          addText(
-            `${lang === "es" ? "Recomendación" : "Recommendation"}: ${s.recommendation}`,
-            body,
-            2
-          );
+          addText(`${lang === "es" ? "Recomendación" : "Recommendation"}: ${s.recommendation}`, body, 2);
         }
 
         if (Array.isArray(s.tips) && s.tips.length) {
@@ -433,7 +455,7 @@ export default function Profile() {
 
     const filename =
       (lang === "es" ? "informe_oraculo_" : "oracle_report_") +
-      (username || "guest").trim().toLowerCase() +
+      (nickname || "guest").trim().toLowerCase() +
       ".pdf";
 
     doc.save(filename);
@@ -447,7 +469,8 @@ export default function Profile() {
           <div className="profile__subtitle">{t.subtitle}</div>
         </div>
 
-        <div className="profile__name">{username}</div>
+        {/* ✅ sigue mostrando el nickname */}
+        <div className="profile__name">{nickname}</div>
 
         <div style={{ marginTop: 10 }}>
           <button className="btn btn--gold" type="button" onClick={exportPdf}>
@@ -455,7 +478,6 @@ export default function Profile() {
           </button>
         </div>
 
-        {/* ✅ Recommended + Selected (compacto y bien alineado) */}
         <div className="profile__levels" style={{ marginTop: 12 }}>
           <div className="profile__levelBox">
             <div className="profile__levelRow">
@@ -531,10 +553,7 @@ export default function Profile() {
                   <div
                     className={`profile__budgetFill ${budget.overCutoff ? "is-over" : ""}`}
                     style={{
-                      width: `${Math.min(
-                        100,
-                        (budget.eurSpent / Math.max(0.01, budget.eurCutoff)) * 100
-                      )}%`,
+                      width: `${Math.min(100, (budget.eurSpent / Math.max(0.01, budget.eurCutoff)) * 100)}%`,
                     }}
                   />
                 </div>
@@ -544,9 +563,7 @@ export default function Profile() {
                 </div>
               </div>
             ) : (
-              <div className="profile__muted">
-                {budgetErr ? `${t.budgetError}: ${budgetErr}` : t.budgetLoading}
-              </div>
+              <div className="profile__muted">{budgetErr ? `${t.budgetError}: ${budgetErr}` : t.budgetLoading}</div>
             )}
           </>
         )}
@@ -571,9 +588,7 @@ export default function Profile() {
               <div className="profile__muted">{t.oracleTipsEmpty}</div>
             )}
 
-            {latestSummary.penalty && (
-              <div className="profile__oraclePenalty">{latestSummary.penalty}</div>
-            )}
+            {latestSummary.penalty && <div className="profile__oraclePenalty">{latestSummary.penalty}</div>}
           </div>
         ) : (
           <div className="profile__muted">{t.oracleTipsEmpty}</div>
@@ -595,9 +610,7 @@ export default function Profile() {
 
                 <div className="profile__bar">
                   <div
-                    className={["profile__barFill", bumpSkill === k ? "is-bump" : ""]
-                      .filter(Boolean)
-                      .join(" ")}
+                    className={["profile__barFill", bumpSkill === k ? "is-bump" : ""].filter(Boolean).join(" ")}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -605,6 +618,13 @@ export default function Profile() {
             );
           })}
         </div>
+
+        {/* (Opcional) Debug mini: ver owner real si Master */}
+        {master && (
+          <div className="profile__muted" style={{ marginTop: 14, fontSize: 12 }}>
+            owner: {ownerUsername || "—"} {authedEmail ? "(email)" : "(nickname fallback)"}
+          </div>
+        )}
       </div>
     </div>
   );
