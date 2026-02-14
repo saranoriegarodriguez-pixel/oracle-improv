@@ -1,80 +1,44 @@
 // src/pages/app/AppShell.tsx
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../state/authStore";
-
-import Topbar from "../../components/Topbar";
+import { Routes, Route } from "react-router-dom";
+import { FeedbackProvider } from "../../state/feedback/FeedbackProvider";
 
 import Home from "./Home";
-import Profile from "./Profile";
-import Settings from "./Settings";
 import Scene from "./Scene";
 import Session from "./Session";
+import Profile from "./Profile";
+import Settings from "./Settings";
 
-export default function AppShell() {
-  const auth = useAuthStore();
-  const navigate = useNavigate();
+import Login from "../auth/Login";
 
-  async function handleLogout() {
-    await auth.logout();
-    navigate("/", { replace: true });
-  }
-
+function NotFound() {
   return (
-    <div className="appShell">
-      {/* Topbar global */}
-      <Topbar />
-
-      {/* Barra interna de la app */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          padding: "12px 16px",
-          alignItems: "center",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
-        }}
-      >
-        <strong style={{ opacity: 0.7 }}>/app</strong>
-
-        <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
-          {auth.status === "authed" && (
-            <>
-              <span style={{ opacity: 0.85 }}>
-                {auth.user?.name || auth.user?.email}
-              </span>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "1.2rem",
-                }}
-                title="Cerrar sesión"
-                aria-label="Cerrar sesión"
-              >
-                🚪
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Rutas internas de la app */}
-      <div className="appShell__content">
-        <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/scene" element={<Scene />} />
-          <Route path="/session" element={<Session />} />
-
-          {/* Default → /app/home */}
-          <Route path="*" element={<Navigate to="/app/home" replace />} />
-        </Routes>
-      </div>
+    <div style={{ padding: 24 }}>
+      <h2>404</h2>
+      <p>Ruta no encontrada.</p>
     </div>
+  );
+}
+
+/**
+ * OJO:
+ * Este AppShell está pensado para montarse en App.tsx como:
+ * <Route path="/app/*" element={<AppShell />} />
+ *
+ * Por eso aquí usamos rutas RELATIVAS: "scene", "session", etc.
+ */
+export default function AppShell() {
+  return (
+    <FeedbackProvider>
+      <Routes>
+        <Route index element={<Home />} />
+        <Route path="scene" element={<Scene />} />
+        <Route path="session" element={<Session />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="login" element={<Login />} />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </FeedbackProvider>
   );
 }
