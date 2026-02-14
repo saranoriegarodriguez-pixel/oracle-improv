@@ -1,20 +1,26 @@
 // server/index.ts
 import express from "express";
 import cors from "cors";
-import session from "express-session";
-import passport from "passport";
+import cookieParser from "cookie-parser";
 
-import "./auth/googleStrategy"; // 🔥 importante: carga la estrategia
-import { PORT, CORS_ORIGIN, SESSION_SECRET } from "./env";
+import { PORT, CORS_ORIGIN } from "./env";
 
 import { googleAuthRouter } from "./routes/googleAuth";
+import { chatRouter } from "./routes/chat";
+
+// (si ya los tienes en tu proyecto)
 import { apiRouter } from "./routes/api";
 import { usageRouter } from "./usage";
 
 const app = express();
 
-app.use(express.json());
+// ✅ Si estás detrás de Vercel/Render/NGINX (para req.ip y cookies secure)
+app.set("trust proxy", 1);
 
+app.use(express.json({ limit: "2mb" }));
+app.use(cookieParser());
+
+// ✅ CORS: cookies + origen controlado
 app.use(
   cors({
     origin: CORS_ORIGIN === "*" ? true : CORS_ORIGIN,
@@ -22,26 +28,20 @@ app.use(
   })
 );
 
-// 🔥 Necesario para mantener la sesión del usuario
-app.use(
-  session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-
-// 🔥 Necesario para Google OAuth
-app.use(passport.initialize());
-app.use(passport.session());
-
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-// Rutas
-app.use("/auth", googleAuthRouter); // 🔥 ahora todo queda bajo /auth
+// ✅ Auth: /api/auth/google/start, /api/auth/google/callback, /api/auth/me, /api/auth/logout
+app.use(googleAuthRouter);
+
+// ✅ Chat: /api/chat (y aquí bloqueas OpenAI si no hay login)
+app.use("/api", chatRouter);
+
+// ✅ App APIs
 app.use("/api", apiRouter);
+
+// ✅ Usage: /api/usage/:username
 app.use("/api", usageRouter);
 
 app.listen(Number(PORT), () => {

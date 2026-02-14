@@ -1,8 +1,12 @@
 // server/auth/sessions.ts
 import type { Request, Response } from "express";
-import { createHmac, randomBytes } from "crypto";
-import { SESSION_SECRET as ENV_SESSION_SECRET } from "../env.ts";
+import crypto from "crypto";
+import { SESSION_SECRET } from "../env";
 
+/**
+ * Sessions in memory (MVP)
+ * sid -> { user, createdAt }
+ */
 export type SessionUser = {
   email?: string;
   name?: string;
@@ -10,41 +14,8 @@ export type SessionUser = {
   verified_email?: boolean;
 };
 
-type SessionRow = {
-  user: SessionUser;
-  createdAt: number;
-};
-
-const sessions = new Map<string, SessionRow>();
-
-// 7 días
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
-/** Lee config desde env */
-function cookieName() {
-  return process.env.COOKIE_NAME || "oracle_sid";
-}
-
-function cookieSameSite(): "lax" | "strict" | "none" {
-  const v = String(process.env.COOKIE_SAMESITE || "lax").toLowerCase();
-  if (v === "strict" || v === "none" || v === "lax") return v;
-  return "lax";
-}
-
-function cookieSecure(): boolean {
-  const raw = process.env.COOKIE_SECURE;
-  if (raw != null) return String(raw).toLowerCase() === "true";
-  return isProd();
-}
-
-function cookieDomain(): string | undefined {
-  const d = String(process.env.COOKIE_DOMAIN || "").trim();
-  return d ? d : undefined;
-}
-
-function isProd() {
-  return process.env.NODE_ENV === "production";
-}
+const sessions = new Map<string, { user: SessionUser; createdAt: number }>();
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function cleanupSessions() {
   const now = Date.now();
@@ -54,22 +25,19 @@ function cleanupSessions() {
 }
 
 function secret() {
-  return (
-    ENV_SESSION_SECRET ||
-    process.env.SESSION_SECRET ||
-    "dev-secret-change-me"
-  );
+  // En prod: pon SESSION_SECRET sí o sí (larga y aleatoria)
+  return SESSION_SECRET || "dev-secret-change-me";
 }
 
 function signSid(sid: string) {
-  return createHmac("sha256", secret()).update(sid).digest("hex");
+  return crypto.createHmac("sha256", secret()).update(sid).digest("hex");
 }
 
-/** formato: sid.signature */
 function parseSignedCookie(raw: string | undefined | null): string | null {
   const v = String(raw ?? "");
   if (!v) return null;
 
+  // format: sid.signature
   const [sid, sig] = v.split(".");
   if (!sid || !sig) return null;
 
@@ -80,20 +48,19 @@ function parseSignedCookie(raw: string | undefined | null): string | null {
 }
 
 /** Crear sesión y set-cookie */
-export function createSession(res: Response, user: SessionUser): void {
+export function createSession(res: Response, user: SessionUser) {
   cleanupSessions();
 
-  const sid = randomBytes(24).toString("hex");
+  const sid = crypto.randomBytes(24).toString("hex");
   sessions.set(sid, { user, createdAt: Date.now() });
 
   const signed = `${sid}.${signSid(sid)}`;
 
-  res.cookie(cookieName(), signed, {
+  res.cookie("sid", signed, {
     httpOnly: true,
-    secure: cookieSecure(),
-    sameSite: cookieSameSite(),
+    secure: true,
+    sameSite: "lax",
     path: "/",
-    domain: cookieDomain(),
     maxAge: SESSION_TTL_MS,
   });
 }
@@ -102,30 +69,21 @@ export function createSession(res: Response, user: SessionUser): void {
 export function getSessionUser(req: Request): SessionUser | null {
   cleanupSessions();
 
-  const cookies = (req as any).cookies as Record<string, string> | undefined;
-
-  const raw = cookies?.[cookieName()];
+  const raw = (req as any).cookies?.sid as string | undefined;
   const sid = parseSignedCookie(raw);
-
   if (!sid) return null;
 
   const s = sessions.get(sid);
-  return s?.user ?? null;
+  if (!s) return null;
+
+  return s.user ?? null;
 }
 
 /** Logout (borra cookie + sesión) */
-export function clearSession(req: Request, res: Response): void {
-  const cookies = (req as any).cookies as Record<string, string> | undefined;
-
-  const raw = cookies?.[cookieName()];
+export function clearSession(req: Request, res: Response) {
+  const raw = (req as any).cookies?.sid as string | undefined;
   const sid = parseSignedCookie(raw);
-
   if (sid) sessions.delete(sid);
 
-  res.clearCookie(cookieName(), {
-    path: "/",
-    domain: cookieDomain(),
-    secure: cookieSecure(),
-    sameSite: cookieSameSite(),
-  });
+  res.clearCookie("sid", { path: "/" });
 }

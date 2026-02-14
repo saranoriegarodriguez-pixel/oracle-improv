@@ -1,3 +1,4 @@
+
 // src/pages/Session.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -12,6 +13,9 @@ import { saveSummary } from "../../state/profileSummaries";
 import { sendEvaluate, normalizeOracle, sumPoints } from "../../api/evaluate";
 import { useToast, useOracleFeedback } from "../../state/feedback/FeedbackProvider";
 
+// ✅ zustand auth store (si lo tienes)
+import { useAuthStore } from "../../state/authStore";
+
 import {
   safeExercise,
   safeMode,
@@ -24,7 +28,6 @@ import {
   type Mode,
   type Lang,
 } from "./sessionHelpers";
-
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -76,11 +79,18 @@ export default function Session() {
   const toast = useToast();
   const oracle = useOracleFeedback();
 
+  // ✅ auth (zustand)
+  const auth = useAuthStore();
+  const authedEmail = auth.user?.email ? String(auth.user.email).trim().toLowerCase() : "";
+  const isAuthed = auth.status === "authed" && !!authedEmail;
+
   const charSlug = params.get("char") ?? "";
   const exerciseId = (safeExercise(params.get("exercise")) ?? "E1") as ExerciseId;
   const mode = (safeMode(params.get("mode")) ?? "train") as Mode;
 
-  const username = loadUsername() || (lang === "es" ? "Sin nombre" : "Unnamed");
+  // 👇 “username” visible (perfil) vs “owner real” (email)
+  const profileName = loadUsername() || (lang === "es" ? "Sin nombre" : "Unnamed");
+  const ownerUsername = authedEmail || profileName; // para /api/usage (idealmente email)
 
   // ✅ sessionId estable por sesión
   const sessionIdRef = useRef<string>(String(params.get("sessionId") ?? makeSessionId()));
@@ -97,6 +107,33 @@ export default function Session() {
   );
 
   const bgUrl = useMemo(() => getBgUrl(charSlug), [charSlug]);
+
+  // -------------------------
+  // Si OpenAI requiere login
+  // -------------------------
+  useEffect(() => {
+    // ✅ refresca /api/auth/me (si tu authStore lo implementa así)
+    if (auth.status === "unknown") {
+      void auth.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!isOpenAI) return;
+
+    // si aún está cargando el estado, no hagas nada
+    if (auth.status === "unknown" || auth.status === "loading") return;
+
+    // si no hay sesión, fuera
+    if (!isAuthed) {
+      toast.warning?.(
+        lang === "es" ? "Para usar OpenAI necesitas iniciar sesión con Google." : "Google login is required for OpenAI."
+      );
+      navigate(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpenAI, auth.status, isAuthed, lang]);
 
   // -------------------------
   // Chat + input
@@ -161,10 +198,12 @@ export default function Session() {
 
   async function refreshUsage() {
     if (!isOpenAI) return;
-    if (!username) return;
+    if (!ownerUsername) return;
 
     try {
-      const res = await fetch(`/api/usage/${encodeURIComponent(username)}`);
+      const res = await fetch(`/api/usage/${encodeURIComponent(ownerUsername)}`, {
+        credentials: "include",
+      });
       if (!res.ok) return;
       const data = (await res.json()) as UsageResponse;
       setUsage(data);
@@ -177,7 +216,7 @@ export default function Session() {
     if (!isOpenAI) return;
     void refreshUsage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpenAI, username]);
+  }, [isOpenAI, ownerUsername]);
 
   // -------------------------
   // Init: system + greeting
@@ -225,7 +264,7 @@ export default function Session() {
     const node = listRef.current;
     if (!node) return;
 
-    const el = node; // ✅ evita “possibly null” en closures
+    const el = node;
 
     const onScroll = () => {
       const threshold = 28;
@@ -250,14 +289,14 @@ export default function Session() {
   const stageRef = useRef<HTMLDivElement | null>(null);
 
   // -------------------------
-  // Parallax suave (solo desktop y solo cuando NO estás haciendo zoom/pan)
+  // Parallax suave
   // -------------------------
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const node = stageRef.current;
     if (!node) return;
-    const el = node; // ✅
+    const el = node;
 
     const reduceMotion =
       typeof window !== "undefined" &&
@@ -275,7 +314,6 @@ export default function Session() {
 
     function onMove(e: PointerEvent) {
       if (e.pointerType === "touch") return;
-      // si estás en cinema y has hecho zoom, manda el pan (no parallax)
       if (cinema && zoomRef.current > 1) return;
 
       const r = el.getBoundingClientRect();
@@ -303,12 +341,12 @@ export default function Session() {
   }, [cinema]);
 
   // -------------------------
-  // Doble click / doble tap reset (cinema)
+  // Doble click / doble tap reset
   // -------------------------
   useEffect(() => {
     const node = stageRef.current;
     if (!node) return;
-    const el = node; // ✅
+    const el = node;
 
     function onDblClick(e: MouseEvent) {
       if (!cinema) return;
@@ -338,12 +376,12 @@ export default function Session() {
   }, [cinema]);
 
   // -------------------------
-  // Zoom con rueda (PC) en cinema + zoom hacia el cursor (y empuja pan)
+  // Zoom con rueda (PC)
   // -------------------------
   useEffect(() => {
     const node = stageRef.current;
     if (!node) return;
-    const el = node; // ✅
+    const el = node;
 
     function onWheel(e: WheelEvent) {
       if (!cinema) return;
@@ -358,7 +396,6 @@ export default function Session() {
       const step = 0.14;
       const nextZ = clamp(Number((prevZ + dir * step).toFixed(2)), ZOOM_MIN, ZOOM_MAX);
 
-      // ancla: lo que está bajo el cursor se mantiene lo más estable posible
       const px = (mx - rect.width / 2 - panRef.current.x) / prevZ;
       const py = (my - rect.height / 2 - panRef.current.y) / prevZ;
 
@@ -376,12 +413,12 @@ export default function Session() {
   }, [cinema]);
 
   // -------------------------
-  // Pan con ratón (drag) cuando cinema && zoom > 1  ✅ PC
+  // Pan con ratón (drag) cuando zoom>1
   // -------------------------
   useEffect(() => {
     const node = stageRef.current;
     if (!node) return;
-    const el = node; // ✅
+    const el = node;
 
     let dragging = false;
     let startX = 0;
@@ -418,9 +455,7 @@ export default function Session() {
 
       try {
         el.releasePointerCapture(e.pointerId);
-      } catch {
-        // ignore
-      }
+      } catch {}
 
       el.style.cursor = zoomRef.current > 1 ? "grab" : "";
     }
@@ -441,11 +476,10 @@ export default function Session() {
     };
   }, [cinema]);
 
-  // Mantén cursor actualizado cuando cambia zoom/cinema
   useEffect(() => {
     const node = stageRef.current;
     if (!node) return;
-    const el = node; // ✅
+    const el = node;
 
     el.style.cursor = cinema && zoom > 1 ? "grab" : "";
     return () => {
@@ -454,13 +488,12 @@ export default function Session() {
   }, [cinema, zoom]);
 
   // -------------------------
-  // Pinch móvil (Pointer Events) solo cinema
-  // + 1 dedo pan cuando zoom>1
+  // Pinch móvil + pan 1 dedo
   // -------------------------
   useEffect(() => {
     const node = stageRef.current;
     if (!node) return;
-    const el = node; // ✅
+    const el = node;
 
     const pointers = new Map<number, { x: number; y: number }>();
     let startDist = 0;
@@ -496,7 +529,6 @@ export default function Session() {
 
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
-      // 1 dedo: pan si hay zoom
       if (pointers.size === 1 && zoomRef.current > 1) {
         const cur = Array.from(pointers.values())[0];
         const dx = cur.x - lastSingle.x;
@@ -508,7 +540,6 @@ export default function Session() {
         return;
       }
 
-      // 2 dedos: pinch zoom
       if (pointers.size === 2) {
         const pts = Array.from(pointers.values());
         const d = dist(pts[0], pts[1]);
@@ -528,9 +559,7 @@ export default function Session() {
 
       try {
         el.releasePointerCapture(e.pointerId);
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
 
     el.addEventListener("pointerdown", onPointerDown);
@@ -560,7 +589,7 @@ export default function Session() {
   }, [timerRunning]);
 
   // -------------------------
-  // Evaluación única por sesión
+  // Evaluación única
   // -------------------------
   async function finalize(reason: "manual" | "time") {
     if (evaluatedRef.current) return;
@@ -583,7 +612,7 @@ export default function Session() {
         messages,
         provider: aiProvider,
         sessionId,
-        username,
+        username: ownerUsername,
       });
 
       const oracleJson = normalizeOracle(out);
@@ -593,7 +622,7 @@ export default function Session() {
 
       saveSummary({
         ts: Date.now(),
-        username,
+        username: ownerUsername,
         sessionId,
         mode,
         exerciseId,
@@ -660,6 +689,13 @@ export default function Session() {
     if (isSending) return;
     if (isEvaluating) return;
 
+    // extra guard: OpenAI requiere auth
+    if (isOpenAI && (auth.status === "unknown" || auth.status === "loading")) return;
+    if (isOpenAI && !isAuthed) {
+      navigate(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`, { replace: true });
+      return;
+    }
+
     const content = input.trim();
     setInput("");
     setIsSending(true);
@@ -671,11 +707,12 @@ export default function Session() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ cookie sid
         body: JSON.stringify({
           messages: next,
           provider: aiProvider,
           sessionId,
-          username,
+          username: ownerUsername,
           mode,
         }),
       });
@@ -785,9 +822,7 @@ export default function Session() {
                 className="btn btn--ghost"
                 type="button"
                 disabled={isEvaluating}
-                onClick={() => {
-                  setCinema((v) => !v);
-                }}
+                onClick={() => setCinema((v) => !v)}
               >
                 {cinema
                   ? lang === "es"

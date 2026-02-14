@@ -1,28 +1,36 @@
-// src/pages/AppShell.tsx
+// src/pages/app/AppShell.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
-
-import Home from "./Home";
-import Scene from "./Scene";
-import Session from "./Session";
-import Profile from "./Profile";
-import Settings from "./Settings";
-
-import { FeedbackProvider } from "../../state/feedback/FeedbackProvider";
+import { useAuthStore } from "../../state/authStore";
 
 export default function AppShell() {
-  return (
-    <FeedbackProvider>
-      <Routes>
-        {/* App real (dentro de /app/*) */}
-        <Route path="/" element={<Home />} />
-        <Route path="/scene" element={<Scene />} />
-        <Route path="/session" element={<Session />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
+  const auth = useAuthStore();
 
-        {/* Si se meten en una ruta rara dentro de /app */}
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      {/* Header mínimo (si luego tienes Topbar real, lo sustituimos) */}
+      <div style={{ display: "flex", gap: 12, alignItems: "center", padding: 16 }}>
+        <div style={{ fontWeight: 700 }}>🔮 App</div>
+
+        <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
+          {auth.user?.email && (
+            <span style={{ opacity: 0.8, fontSize: 13 }}>{auth.user.email}</span>
+          )}
+
+          <button onClick={() => void auth.logout()}>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      {/* Rutas internas (pon aquí tus páginas reales) */}
+      <Routes>
+        <Route path="/" element={<div style={{ padding: 16 }}>Home interna</div>} />
+        {/* Ejemplos:
+            <Route path="scene" element={<Scene />} />
+            <Route path="session" element={<Session />} />
+        */}
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
-    </FeedbackProvider>
+    </div>
   );
 }
