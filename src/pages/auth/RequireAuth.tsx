@@ -15,11 +15,7 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   }, []);
 
   if (auth.status === "unknown" || auth.status === "loading") {
-    return (
-      <div style={{ padding: 20, opacity: 0.85 }}>
-        Cargando sesión…
-      </div>
-    );
+    return <div style={{ padding: 20, opacity: 0.85 }}>Cargando sesión…</div>;
   }
 
   if (auth.status !== "authed") {

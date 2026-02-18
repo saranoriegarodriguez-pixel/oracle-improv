@@ -10,7 +10,12 @@ import {
   GOOGLE_CALLBACK_URL,
 } from "../env";
 
-import { createSession, getSessionUser, clearSession, type SessionUser } from "../auth/sessions";
+import {
+  createSession,
+  getSessionUser,
+  clearSession,
+  type SessionUser,
+} from "../auth/sessions";
 
 export const googleAuthRouter = Router();
 
@@ -57,10 +62,20 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 googleAuthRouter.get("/api/auth/google/start", (req: Request, res: Response) => {
   cleanupStateStore();
 
-  const next = String(req.query.next ?? "").trim() || GOOGLE_CALLBACK_URL || "/app";
+  const next =
+    String(req.query.next ?? "").trim() ||
+    GOOGLE_CALLBACK_URL ||
+    "/app";
 
   const state = crypto.randomBytes(16).toString("hex");
   stateStore.set(state, { ts: Date.now(), next });
+
+  if (!GOOGLE_CLIENT_ID) {
+    return res.status(500).json({ error: "Missing GOOGLE_CLIENT_ID in env" });
+  }
+  if (!GOOGLE_REDIRECT_URI) {
+    return res.status(500).json({ error: "Missing GOOGLE_REDIRECT_URI in env" });
+  }
 
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
@@ -92,6 +107,10 @@ googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Resp
     const next = consumeState(state);
     if (!next) return res.status(400).send("Invalid/expired state");
 
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
+      return res.status(500).send("Missing Google OAuth env vars");
+    }
+
     // 1) code -> token
     const tokenRes = await fetchJson<{
       access_token: string;
@@ -113,9 +132,12 @@ googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Resp
     });
 
     // 2) userinfo
-    const userInfo = await fetchJson<SessionUser>("https://www.googleapis.com/oauth2/v2/userinfo", {
-      headers: { Authorization: `Bearer ${tokenRes.access_token}` },
-    });
+    const userInfo = await fetchJson<SessionUser>(
+      "https://www.googleapis.com/oauth2/v2/userinfo",
+      {
+        headers: { Authorization: `Bearer ${tokenRes.access_token}` },
+      }
+    );
 
     // 3) cookie session
     createSession(res, userInfo);
@@ -146,3 +168,4 @@ googleAuthRouter.post("/api/auth/logout", (req: Request, res: Response) => {
   clearSession(req, res);
   return res.json({ ok: true });
 });
+

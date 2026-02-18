@@ -1,288 +1,203 @@
-import { useEffect, useMemo, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+// src/components/Topbar.tsx
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../state/authStore";
+import { useAppSettings } from "../state/appSettings";
 import "./Topbar.css";
 
-import { useAppSettings } from "../state/appSettings";
-import { useAuthStore } from "../state/authStore";
+type TopbarMode = "portfolio" | "app";
 
-function cx(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
+const navCls = ({ isActive }: { isActive: boolean }) =>
+  "topbar__iconLink" + (isActive ? " is-active" : "");
 
-export default function Topbar() {
-  const [open, setOpen] = useState(false);
+export default function Topbar({ mode }: { mode: TopbarMode }) {
+  const auth = useAuthStore();
+  const { st, setLang } = useAppSettings();
+  const lang = (st.lang ?? "es") as "es" | "en";
+
   const loc = useLocation();
   const nav = useNavigate();
 
-  const { st, setLang } = useAppSettings();
-  const auth = useAuthStore();
+  const isAuthed = auth.status === "authed";
 
-  const isApp = useMemo(() => loc.pathname.startsWith("/app"), [loc.pathname]);
-  const lang = (st.lang ?? "es") as "es" | "en";
+  const labels = {
+    home: lang === "es" ? "Home" : "Home",
+    work: lang === "es" ? "Work" : "Work",
+    about: lang === "es" ? "Sobre mí" : "About",
+    cv: "CV",
+    contact: lang === "es" ? "Contacto" : "Contact",
+    app: "App",
+    profile: lang === "es" ? "Perfil" : "Profile",
+    settings: lang === "es" ? "Ajustes" : "Settings",
+    portfolio: lang === "es" ? "Portfolio" : "Portfolio",
+    login: lang === "es" ? "Iniciar sesión" : "Sign in",
+    goApp: lang === "es" ? "Ir a la app" : "Go to app",
+    logout: lang === "es" ? "Cerrar sesión" : "Sign out",
+  };
 
-  // ✅ Evita el error TS: no comparamos con "authenticated" directamente
-  // (tu AuthStatus seguramente usa otros literales)
-  const authStatus = (auth as any)?.status as string | undefined;
-  const isAuthed =
-    authStatus === "authenticated" ||
-    authStatus === "authed" ||
-    authStatus === "signed_in" ||
-    authStatus === "logged_in" ||
-    authStatus === "ready" ||
-    Boolean((auth as any)?.user);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [loc.pathname]);
-
-  useEffect(() => {
-    if ((auth as any)?.status === "unknown" && typeof (auth as any)?.refresh === "function") {
-      (auth as any).refresh();
-    }
-  }, [auth]);
-
-  const labels = useMemo(() => {
-    if (lang === "en") {
-      return {
-        home: "Home",
-        work: "Work",
-        about: "About",
-        contact: "Contact",
-        cv: "CV",
-        portfolio: "Portfolio",
-        app: "App",
-        profile: "Profile",
-        settings: "Settings",
-        logout: "Sign out",
-        menuOpen: "Open menu",
-        menuClose: "Close menu",
-      };
-    }
-    return {
-      home: "Home",
-      work: "Work",
-      about: "Sobre mí",
-      contact: "Contacto",
-      cv: "CV",
-      portfolio: "Portfolio",
-      app: "App",
-      profile: "Perfil",
-      settings: "Ajustes",
-      logout: "Cerrar sesión",
-      menuOpen: "Abrir menú",
-      menuClose: "Cerrar menú",
-    };
-  }, [lang]);
-
-  async function onLogout() {
-    try {
-      await fetch("/auth/logout", { method: "POST", credentials: "include" });
-    } catch {
-      // da igual; igualmente volvemos y refrescamos estado
-    } finally {
-      if (typeof (auth as any)?.refresh === "function") (auth as any).refresh();
-      nav("/", { replace: true });
-    }
-  }
+  const goLogin = () => {
+    const next = loc.pathname + loc.search;
+    nav(`/login?next=${encodeURIComponent(next)}`);
+  };
 
   return (
-    <header className="tb">
-      <div className="tb__inner">
-        {/* Brand */}
-        <NavLink to="/" className="tb__brand" aria-label="Ir a portfolio">
-          <span className="tb__brandMain">Sara Atelier</span>
-          <span className="tb__brandDot">•</span>
-          <span className="tb__brandSub">Studio</span>
-        </NavLink>
-
-        {/* Tools (derecha) */}
-        <div className="tb__tools">
-          {/* Idioma rápido */}
-          <div className="tb__lang" aria-label="Idioma">
-            <button
-              className={cx("tb__pill", lang === "es" && "is-active")}
-              onClick={() => setLang("es")}
-              type="button"
-            >
-              ES
-            </button>
-            <button
-              className={cx("tb__pill", lang === "en" && "is-active")}
-              onClick={() => setLang("en")}
-              type="button"
-            >
-              EN
-            </button>
-          </div>
-
-          {/* Iconos rápidos */}
-          <div className="tb__quick">
-            {/* 🌐 Portfolio */}
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) => cx("tb__iconBtn", isActive && !isApp && "is-active")}
-              title={labels.portfolio}
-              aria-label={labels.portfolio}
-            >
-              <span className="tb__emoji" aria-hidden="true">
-                🌐
-              </span>
-            </NavLink>
-
-            {/* 🔮 App */}
-            <NavLink
-              to="/app"
-              className={() => cx("tb__iconBtn", isApp && "is-active")}
-              title={labels.app}
-              aria-label={labels.app}
-            >
-              <span className="tb__emoji" aria-hidden="true">
-                🔮
-              </span>
-            </NavLink>
-
-            {/* 👤 y ⚙️ solo dentro de /app */}
-            {isApp ? (
-              <>
-                <NavLink
-                  to="/app/profile"
-                  className={({ isActive }) => cx("tb__iconBtn", isActive && "is-active")}
-                  title={labels.profile}
-                  aria-label={labels.profile}
-                >
-                  <span className="tb__emoji" aria-hidden="true">
-                    👤
-                  </span>
-                </NavLink>
-
-                <NavLink
-                  to="/app/settings"
-                  className={({ isActive }) => cx("tb__iconBtn", isActive && "is-active")}
-                  title={labels.settings}
-                  aria-label={labels.settings}
-                >
-                  <span className="tb__emoji" aria-hidden="true">
-                    ⚙️
-                  </span>
-                </NavLink>
-              </>
-            ) : null}
-
-            {/* 🚪 Logout (si hay sesión) */}
-            {isAuthed ? (
-              <button
-                className="tb__iconBtn"
-                onClick={onLogout}
-                title={labels.logout}
-                aria-label={labels.logout}
-                type="button"
-              >
-                <span className="tb__emoji" aria-hidden="true">
-                  🚪
-                </span>
-              </button>
-            ) : null}
-          </div>
-
-          {/* Burger */}
-          <button
-            className={cx("tb__burger", open && "is-open")}
-            onClick={() => setOpen((v) => !v)}
-            aria-label={open ? labels.menuClose : labels.menuOpen}
-            aria-expanded={open}
-            type="button"
-          >
-            <span />
-            <span />
-            <span />
-          </button>
+    <header className={`topbar topbar--${mode}`}>
+      <div className="topbar__inner">
+        {/* LEFT BRAND */}
+        <div className="topbar__left">
+          <Link to="/" className="topbar__brand" aria-label="Sara Atelier Studio">
+            <span className="topbar__brandMain">Sara Atelier</span>
+            <span className="topbar__brandDot">•</span>
+            <span className="topbar__brandSub">Studio</span>
+          </Link>
         </div>
 
-        {/* Nav (links de texto) */}
-        <nav className={cx("tb__nav", open && "is-open")} aria-label="Navegación">
-          <div className="tb__group">
-            <NavLink to="/" end className={({ isActive }) => cx("tb__link", isActive && !isApp && "is-active")}>
-              {labels.home}
-            </NavLink>
-            <NavLink to="/work" className={({ isActive }) => cx("tb__link", isActive && !isApp && "is-active")}>
-              {labels.work}
-            </NavLink>
-            <NavLink to="/about" className={({ isActive }) => cx("tb__link", isActive && !isApp && "is-active")}>
-              {labels.about}
-            </NavLink>
-            <NavLink to="/contact" className={({ isActive }) => cx("tb__link", isActive && !isApp && "is-active")}>
-              {labels.contact}
-            </NavLink>
-            <NavLink to="/cv" className={({ isActive }) => cx("tb__link", isActive && !isApp && "is-active")}>
-              {labels.cv}
-            </NavLink>
-          </div>
+        {/* CENTER NAV (solo iconos) */}
+        <nav className="topbar__nav" aria-label="Main navigation">
+          {mode === "portfolio" ? (
+            <>
+              <NavLink to="/" className={navCls} aria-label={labels.home} title={labels.home}>
+                🎪
+              </NavLink>
 
-          <div className="tb__sep" />
+              <NavLink to="/work" className={navCls} aria-label={labels.work} title={labels.work}>
+                🧰
+              </NavLink>
 
-          <div className="tb__group">
-            <NavLink to="/app" className={() => cx("tb__cta", isApp && "is-active")}>
-              <span className="tb__emoji" aria-hidden="true">
+              <NavLink to="/about" className={navCls} aria-label={labels.about} title={labels.about}>
+                🪪
+              </NavLink>
+
+              <NavLink to="/cv" className={navCls} aria-label={labels.cv} title={labels.cv}>
+                📄
+              </NavLink>
+
+              <NavLink
+                to="/contact"
+                className={navCls}
+                aria-label={labels.contact}
+                title={labels.contact}
+              >
+                ✉️
+              </NavLink>
+
+              {/* App destacado */}
+              <Link
+                to="/app"
+                className="topbar__iconLink topbar__iconLink--gold"
+                aria-label={labels.app}
+                title={labels.app}
+              >
                 🔮
-              </span>
-              {labels.app}
-            </NavLink>
+              </Link>
+            </>
+          ) : (
+            <>
+              <NavLink to="/app" className={navCls} aria-label={labels.app} title={labels.app}>
+                🔮
+              </NavLink>
 
-            {isApp ? (
-              <>
-                <NavLink to="/app/profile" className="tb__ghost">
-                  <span className="tb__emoji" aria-hidden="true">
-                    👤
-                  </span>
-                  {labels.profile}
-                </NavLink>
+              <NavLink
+                to="/app/profile"
+                className={navCls}
+                aria-label={labels.profile}
+                title={labels.profile}
+              >
+                🪪
+              </NavLink>
 
-                <NavLink to="/app/settings" className="tb__ghost">
-                  <span className="tb__emoji" aria-hidden="true">
-                    ⚙️
-                  </span>
-                  {labels.settings}
-                </NavLink>
-              </>
-            ) : null}
+              <NavLink
+                to="/app/settings"
+                className={navCls}
+                aria-label={labels.settings}
+                title={labels.settings}
+              >
+                ⚙️
+              </NavLink>
 
-            {isAuthed ? (
-              <button className="tb__ghost" onClick={onLogout} type="button">
-                <span className="tb__emoji" aria-hidden="true">
-                  🚪
-                </span>
-                {labels.logout}
-              </button>
-            ) : null}
-          </div>
+              <NavLink
+                to="/"
+                className={navCls}
+                aria-label={labels.portfolio}
+                title={labels.portfolio}
+              >
+                🎪
+              </NavLink>
+            </>
+          )}
+        </nav>
 
-          {/* Idioma también en menú móvil */}
-          <div className="tb__lang tb__lang--mobile">
+        {/* RIGHT ACTIONS */}
+        <div className="topbar__right">
+          {/* Lang pills */}
+          <div className="topbar__lang" role="group" aria-label="Language">
             <button
-              className={cx("tb__pill", lang === "es" && "is-active")}
+              className={`topbar__pill ${lang === "es" ? "is-active" : ""}`}
               onClick={() => setLang("es")}
               type="button"
+              aria-label="ES"
+              title="ES"
             >
               ES
             </button>
             <button
-              className={cx("tb__pill", lang === "en" && "is-active")}
+              className={`topbar__pill ${lang === "en" ? "is-active" : ""}`}
               onClick={() => setLang("en")}
               type="button"
+              aria-label="EN"
+              title="EN"
             >
               EN
             </button>
           </div>
-        </nav>
-      </div>
 
-      <button
-        className={cx("tb__overlay", open && "is-open")}
-        onClick={() => setOpen(false)}
-        aria-label={labels.menuClose}
-        type="button"
-      />
+          {/* Portfolio: login/go app/logout */}
+          {mode === "portfolio" ? (
+            !isAuthed ? (
+              <button
+                className="topbar__iconBtn"
+                onClick={goLogin}
+                aria-label={labels.login}
+                title={labels.login}
+                type="button"
+              >
+                🔐
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/app"
+                  className="topbar__iconLink topbar__iconLink--gold"
+                  aria-label={labels.goApp}
+                  title={labels.goApp}
+                >
+                  🔮
+                </Link>
+
+                <button
+                  className="topbar__iconBtn topbar__iconBtn--danger"
+                  onClick={() => void auth.logout()}
+                  aria-label={labels.logout}
+                  title={labels.logout}
+                  type="button"
+                >
+                  🚪
+                </button>
+              </>
+            )
+          ) : (
+            // App: logout siempre visible
+            <button
+              className="topbar__iconBtn topbar__iconBtn--danger"
+              onClick={() => void auth.logout()}
+              aria-label={labels.logout}
+              title={labels.logout}
+              type="button"
+            >
+              🚪
+            </button>
+          )}
+        </div>
+      </div>
     </header>
   );
 }

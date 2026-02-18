@@ -1,7 +1,13 @@
 // server/auth/sessions.ts
 import type { Request, Response } from "express";
 import crypto from "crypto";
-import { SESSION_SECRET } from "../env";
+import {
+  SESSION_SECRET,
+  COOKIE_NAME,
+  COOKIE_SECURE,
+  COOKIE_SAMESITE,
+  COOKIE_DOMAIN,
+} from "../env";
 
 /**
  * Sessions in memory (MVP)
@@ -47,6 +53,21 @@ function parseSignedCookie(raw: string | undefined | null): string | null {
   return sid;
 }
 
+function cookieOpts() {
+  const base: any = {
+    httpOnly: true,
+    secure: COOKIE_SECURE,
+    sameSite: COOKIE_SAMESITE,
+    path: "/",
+    maxAge: SESSION_TTL_MS,
+  };
+
+  // Domain solo si lo configuras (normalmente solo prod)
+  if (COOKIE_DOMAIN) base.domain = COOKIE_DOMAIN;
+
+  return base;
+}
+
 /** Crear sesión y set-cookie */
 export function createSession(res: Response, user: SessionUser) {
   cleanupSessions();
@@ -55,21 +76,14 @@ export function createSession(res: Response, user: SessionUser) {
   sessions.set(sid, { user, createdAt: Date.now() });
 
   const signed = `${sid}.${signSid(sid)}`;
-
-  res.cookie("sid", signed, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_TTL_MS,
-  });
+  res.cookie(COOKIE_NAME, signed, cookieOpts());
 }
 
 /** Leer usuario desde cookie; devuelve null si no hay sesión válida */
 export function getSessionUser(req: Request): SessionUser | null {
   cleanupSessions();
 
-  const raw = (req as any).cookies?.sid as string | undefined;
+  const raw = (req as any).cookies?.[COOKIE_NAME] as string | undefined;
   const sid = parseSignedCookie(raw);
   if (!sid) return null;
 
@@ -81,9 +95,13 @@ export function getSessionUser(req: Request): SessionUser | null {
 
 /** Logout (borra cookie + sesión) */
 export function clearSession(req: Request, res: Response) {
-  const raw = (req as any).cookies?.sid as string | undefined;
+  const raw = (req as any).cookies?.[COOKIE_NAME] as string | undefined;
   const sid = parseSignedCookie(raw);
   if (sid) sessions.delete(sid);
 
-  res.clearCookie("sid", { path: "/" });
+  // Para borrar bien, hay que usar las mismas opciones relevantes (path/domain)
+  const opts: any = { path: "/" };
+  if (COOKIE_DOMAIN) opts.domain = COOKIE_DOMAIN;
+
+  res.clearCookie(COOKIE_NAME, opts);
 }

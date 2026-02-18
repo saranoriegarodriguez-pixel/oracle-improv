@@ -1,62 +1,60 @@
 // src/pages/auth/Login.tsx
-import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuthStore } from "../../state/authStore";
+import { useLocation } from "react-router-dom";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const auth = useAuthStore();
+  const loc = useLocation();
 
-  const [loading, setLoading] = useState(false);
-  const next = useMemo(() => params.get("next") || "/app", [params]);
+  const params = new URLSearchParams(loc.search);
 
-  async function startGoogle() {
-    setLoading(true);
-    try {
-      const r = await fetch(`/api/auth/google/start?next=${encodeURIComponent(next)}`, {
-        credentials: "include",
-      });
-      if (!r.ok) throw new Error(await r.text());
-      const data = (await r.json()) as { url: string };
-      window.location.href = data.url;
-    } catch {
-      setLoading(false);
-      alert("No se pudo iniciar Google Login.");
+  // ✅ Si viene /app, lo convertimos a URL absoluta del frontend
+  const rawNext = params.get("next") ?? "/app";
+  const next =
+    rawNext.startsWith("http")
+      ? rawNext
+      : `http://localhost:5173${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
+
+  const onGoogleLogin = async () => {
+    // ✅ start correcto (con /api)
+    const startUrl = `http://localhost:3000/api/auth/google/start?next=${encodeURIComponent(
+      next
+    )}`;
+
+    const r = await fetch(startUrl, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!r.ok) {
+      const txt = await r.text().catch(() => "");
+      throw new Error(`OAuth start failed ${r.status}: ${txt || r.statusText}`);
     }
-  }
 
-  async function checkMe() {
-    setLoading(true);
-    await auth.refresh();
-    setLoading(false);
+    const data = (await r.json()) as { url?: string };
+    if (!data.url) throw new Error("Missing url from backend");
 
-    if (auth.status === "authed") {
-      navigate(next, { replace: true });
-    }
-  }
+    window.location.href = data.url;
+  };
 
   return (
     <div style={{ padding: 24, maxWidth: 520, margin: "0 auto" }}>
-      <h2>Iniciar sesión</h2>
-      <p style={{ opacity: 0.85 }}>
-        Google crea una cookie de sesión (sid). La usamos para habilitar OpenAI y contar límites diarios.
-      </p>
+      <h1>Iniciar sesión</h1>
+      <p>Para entrar en la app necesitas iniciar sesión con Google.</p>
 
       <button
-        type="button"
-        onClick={startGoogle}
-        disabled={loading}
-        style={{ padding: "10px 14px", marginTop: 10 }}
+        onClick={() => void onGoogleLogin()}
+        style={{
+          padding: "12px 16px",
+          borderRadius: 12,
+          border: "1px solid rgba(255,255,255,.18)",
+          background: "rgba(255,255,255,.06)",
+          color: "inherit",
+          cursor: "pointer",
+          width: "100%",
+          fontSize: 16,
+        }}
       >
-        {loading ? "Abriendo Google…" : "Continuar con Google"}
+        Entrar con Google
       </button>
-
-      <div style={{ marginTop: 14, opacity: 0.8 }}>
-        <button type="button" onClick={checkMe} disabled={loading}>
-          Ya volví del callback, comprobar sesión
-        </button>
-      </div>
     </div>
   );
 }

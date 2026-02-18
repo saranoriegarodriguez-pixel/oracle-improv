@@ -2,6 +2,9 @@
 import { create } from "zustand";
 import type { AuthStatus, AuthUser, AuthMeResponse } from "./authTypes";
 
+// ✅ Backend Express
+const API_BASE = "http://localhost:3000";
+
 type AuthState = {
   status: AuthStatus;
   user: AuthUser | null;
@@ -11,7 +14,7 @@ type AuthState = {
 };
 
 async function fetchMe(): Promise<AuthMeResponse> {
-  const r = await fetch("/api/auth/me", { credentials: "include" });
+  const r = await fetch(`${API_BASE}/api/auth/me`, { credentials: "include" });
   if (!r.ok) return { ok: false };
   return (await r.json()) as AuthMeResponse;
 }
@@ -21,7 +24,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
 
   refresh: async () => {
-    // evita llamadas duplicadas si ya estás cargando
     if (get().status === "loading") return;
 
     set({ status: "loading" });
@@ -33,14 +35,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ status: "anon", user: null });
       }
     } catch {
-      // si falla, mejor considerarlo anon (no bloquea la app)
       set({ status: "anon", user: null });
     }
   },
 
   logout: async () => {
     try {
-      await fetch("/api/auth/logout", {
+      await fetch(`${API_BASE}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

@@ -8,23 +8,20 @@ import { CORS_ORIGIN } from "./env";
 import { googleAuthRouter } from "./routes/googleAuth";
 import { chatRouter } from "./routes/chat";
 
-// Si ya existen en tu proyecto
+// si existen en tu repo
 import { apiRouter } from "./routes/api";
 import { usageRouter } from "./usage";
 
 const app = express();
 
-// ✅ Importante detrás de Vercel (cookies secure + req.ip)
+// ✅ detrás de Vercel/proxies (cookies secure + req.ip bien)
 app.set("trust proxy", 1);
 
 app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 
-// ✅ CORS con soporte de lista (recomendado para cookies)
-// - Si CORS_ORIGIN="*" => origin:true (refleja el origin)
-// - Si CORS_ORIGIN="https://a.com,https://b.com" => allowlist
-const raw = String(CORS_ORIGIN ?? "").trim();
-const allowList = raw
+// ✅ CORS robusto (con cookies necesitas origen explícito, no "*")
+const allowedOrigins = (CORS_ORIGIN || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
@@ -32,16 +29,10 @@ const allowList = raw
 app.use(
   cors({
     origin: (origin, cb) => {
-      // allow requests sin origin (postman/health checks)
+      // Algunas requests (curl / server-to-server) no traen Origin
       if (!origin) return cb(null, true);
-
-      // Si has puesto "*" o no has puesto nada: dejamos pasar
-      if (!raw || allowList.includes("*")) return cb(null, true);
-
-      // allowlist
-      if (allowList.includes(origin)) return cb(null, true);
-
-      return cb(new Error(`CORS blocked: ${origin}`));
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
   })
@@ -51,10 +42,10 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-// ✅ Auth: /api/auth/google/start, /api/auth/google/callback, /api/auth/me, /api/auth/logout
+// ✅ Auth: el router ya incluye /api/auth/... dentro
 app.use(googleAuthRouter);
 
-// ✅ Chat: /api/chat (y aquí bloqueas OpenAI si no hay login)
+// ✅ Chat: /api/chat
 app.use("/api", chatRouter);
 
 // ✅ App APIs

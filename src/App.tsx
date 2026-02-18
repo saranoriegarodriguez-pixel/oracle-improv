@@ -1,54 +1,34 @@
 // src/App.tsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
-// ✅ Topbar común (la misma para web + app)
-import Topbar from "./components/Topbar";
-
-// Portfolio (web)
-import Home from "./pages/portfolio/Home";
-import Work from "./pages/portfolio/Work";
-import About from "./pages/portfolio/About";
-import Contact from "./pages/portfolio/Contact";
-import CV from "./pages/portfolio/CV";
-import ProjectPage from "./pages/portfolio/ProjectPage";
+// Portfolio layout
+import PortfolioLayout from "./layouts/PortfolioLayout";
 
 // Auth
 import Login from "./pages/auth/Login";
 import RequireAuth from "./pages/auth/RequireAuth";
 
-// App interna
-import AppShell from "./pages/app/AppShell";
+// App layout
+import AppLayout from "./layouts/AppLayout";
 
 export default function App() {
   return (
-    <>
-      <Topbar />
+    <Routes>
+      {/* 🔐 LOGIN */}
+      <Route path="/login" element={<Login />} />
 
-      <Routes>
-        {/* 🌐 WEB / PORTFOLIO */}
-        <Route path="/" element={<Home />} />
-        <Route path="/work" element={<Work />} />
-        <Route path="/work/:slug" element={<ProjectPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/cv" element={<CV />} />
+      {/* 🔮 APP PRIVADA */}
+      <Route
+        path="/app/*"
+        element={
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        }
+      />
 
-        {/* 🔐 LOGIN */}
-        <Route path="/login" element={<Login />} />
-
-        {/* 🔮 APP (privada) */}
-        <Route
-          path="/app/*"
-          element={
-            <RequireAuth>
-              <AppShell />
-            </RequireAuth>
-          }
-        />
-
-        {/* fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </>
+      {/* 🎪 PORTFOLIO */}
+      <Route path="/*" element={<PortfolioLayout />} />
+    </Routes>
   );
 }
