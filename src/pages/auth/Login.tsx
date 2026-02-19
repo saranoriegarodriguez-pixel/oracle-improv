@@ -3,23 +3,20 @@ import { useLocation } from "react-router-dom";
 
 export default function Login() {
   const loc = useLocation();
-
   const params = new URLSearchParams(loc.search);
 
-  // ✅ Si viene /app, lo convertimos a URL absoluta del frontend
   const rawNext = params.get("next") ?? "/app";
+  const frontendOrigin = window.location.origin;
+
   const next =
     rawNext.startsWith("http")
       ? rawNext
-      : `http://localhost:5173${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
+      : `${frontendOrigin}${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
 
   const onGoogleLogin = async () => {
-    // ✅ start correcto (con /api)
-    const startUrl = `http://localhost:3000/api/auth/google/start?next=${encodeURIComponent(
-      next
-    )}`;
+    const startPath = `/api/auth/google/start?next=${encodeURIComponent(next)}`;
 
-    const r = await fetch(startUrl, {
+    const r = await fetch(startPath, {
       method: "GET",
       credentials: "include",
     });

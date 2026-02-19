@@ -6,8 +6,8 @@ import crypto from "crypto";
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URI,
-  GOOGLE_CALLBACK_URL,
+  GOOGLE_CALLBACK_URL, // ✅ backend callback (registrado en Google Cloud)
+  APP_ORIGIN,          // ✅ frontend origin (local/prod)
 } from "../env";
 
 import {
@@ -56,16 +56,20 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 
 /**
  * GET /api/auth/google/start
+ * (Este router se monta en /api desde app.ts)
+ *
  * Devuelve la URL de Google para iniciar login.
- * Acepta ?next=/app/...
+ * Acepta ?next=/app/... o una URL absoluta.
  */
-googleAuthRouter.get("/api/auth/google/start", (req: Request, res: Response) => {
+googleAuthRouter.get("/auth/google/start", (req: Request, res: Response) => {
   cleanupStateStore();
 
+  const rawNext = String(req.query.next ?? "").trim();
+
+  // ✅ next por defecto a la app
   const next =
-    String(req.query.next ?? "").trim() ||
-    GOOGLE_CALLBACK_URL ||
-    "/app";
+    rawNext ||
+    `${APP_ORIGIN}/app`;
 
   const state = crypto.randomBytes(16).toString("hex");
   stateStore.set(state, { ts: Date.now(), next });
@@ -73,13 +77,13 @@ googleAuthRouter.get("/api/auth/google/start", (req: Request, res: Response) => 
   if (!GOOGLE_CLIENT_ID) {
     return res.status(500).json({ error: "Missing GOOGLE_CLIENT_ID in env" });
   }
-  if (!GOOGLE_REDIRECT_URI) {
-    return res.status(500).json({ error: "Missing GOOGLE_REDIRECT_URI in env" });
+  if (!GOOGLE_CALLBACK_URL) {
+    return res.status(500).json({ error: "Missing GOOGLE_CALLBACK_URL in env" });
   }
 
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
-    redirect_uri: GOOGLE_REDIRECT_URI,
+    redirect_uri: GOOGLE_CALLBACK_URL, // ✅ Google vuelve aquí (backend)
     response_type: "code",
     scope: "openid email profile",
     state,
@@ -88,7 +92,7 @@ googleAuthRouter.get("/api/auth/google/start", (req: Request, res: Response) => 
   });
 
   const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  res.json({ url });
+  return res.json({ url });
 });
 
 /**
@@ -96,7 +100,7 @@ googleAuthRouter.get("/api/auth/google/start", (req: Request, res: Response) => 
  * Intercambia code -> tokens -> userinfo.
  * Crea cookie de sesión y redirige a next.
  */
-googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Response) => {
+googleAuthRouter.get("/auth/google/callback", async (req: Request, res: Response) => {
   try {
     const code = String(req.query.code ?? "");
     const state = String(req.query.state ?? "");
@@ -107,7 +111,7 @@ googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Resp
     const next = consumeState(state);
     if (!next) return res.status(400).send("Invalid/expired state");
 
-    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_CALLBACK_URL) {
       return res.status(500).send("Missing Google OAuth env vars");
     }
 
@@ -126,7 +130,7 @@ googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Resp
         code,
         client_id: GOOGLE_CLIENT_ID,
         client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_REDIRECT_URI,
+        redirect_uri: GOOGLE_CALLBACK_URL, // ✅ el mismo
         grant_type: "authorization_code",
       }).toString(),
     });
@@ -134,9 +138,7 @@ googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Resp
     // 2) userinfo
     const userInfo = await fetchJson<SessionUser>(
       "https://www.googleapis.com/oauth2/v2/userinfo",
-      {
-        headers: { Authorization: `Bearer ${tokenRes.access_token}` },
-      }
+      { headers: { Authorization: `Bearer ${tokenRes.access_token}` } }
     );
 
     // 3) cookie session
@@ -152,9 +154,8 @@ googleAuthRouter.get("/api/auth/google/callback", async (req: Request, res: Resp
 
 /**
  * GET /api/auth/me
- * 200 si hay sesión, 401 si no.
  */
-googleAuthRouter.get("/api/auth/me", (req: Request, res: Response) => {
+googleAuthRouter.get("/auth/me", (req: Request, res: Response) => {
   const user = getSessionUser(req);
   if (!user) return res.status(401).json({ ok: false });
   return res.json({ ok: true, user });
@@ -162,10 +163,8 @@ googleAuthRouter.get("/api/auth/me", (req: Request, res: Response) => {
 
 /**
  * POST /api/auth/logout
- * Borra sesión y cookie.
  */
-googleAuthRouter.post("/api/auth/logout", (req: Request, res: Response) => {
+googleAuthRouter.post("/auth/logout", (req: Request, res: Response) => {
   clearSession(req, res);
   return res.json({ ok: true });
 });
-

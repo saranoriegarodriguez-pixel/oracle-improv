@@ -19,9 +19,11 @@ function str(value: string | undefined, fallback = ""): string {
 // ===============================
 export const PORT = str(process.env.PORT, "3000");
 
-// OJO: en producción NO uses "*" si vas con cookies.
-// Para local suele ser "http://localhost:5173"
-export const CORS_ORIGIN = str(process.env.CORS_ORIGIN, "*");
+// ⚠️ En producción NO uses "*" si vas con cookies.
+export const CORS_ORIGIN = str(process.env.CORS_ORIGIN, "http://localhost:5173");
+
+// ✅ Origen del frontend (donde vive tu web/app)
+export const APP_ORIGIN = str(process.env.APP_ORIGIN, "http://localhost:5173");
 
 // ===============================
 // AI / Providers
@@ -43,7 +45,6 @@ export const OPENAI_ORACLE_MODEL = str(process.env.OPENAI_ORACLE_MODEL, "");
 // ===============================
 // Tokens / caps
 // ===============================
-// Defaults razonables (si faltan envs no te deja a 0 y te “rompe” UX)
 export const MAX_TOKENS_TRAIN = clamp(num(process.env.MAX_TOKENS_TRAIN, 900), 64, 8000);
 export const MAX_TOKENS_SCENE = clamp(num(process.env.MAX_TOKENS_SCENE, 1200), 64, 12000);
 export const MAX_TOKENS_TRIAL = clamp(num(process.env.MAX_TOKENS_TRIAL, 800), 64, 8000);
@@ -80,10 +81,16 @@ export const DEBUG_RAW = process.env.DEBUG_RAW === "1";
 // ===============================
 // Google OAuth
 // ===============================
+// ✅ Client ID/Secret de Google
 export const GOOGLE_CLIENT_ID = str(process.env.GOOGLE_CLIENT_ID, "");
 export const GOOGLE_CLIENT_SECRET = str(process.env.GOOGLE_CLIENT_SECRET, "");
-export const GOOGLE_REDIRECT_URI = str(process.env.GOOGLE_REDIRECT_URI, "");
+
+// ✅ Redirect URI registrado en Google Cloud (apunta al BACKEND)
+// Ejemplos:
+// - Local: http://localhost:3000/auth/google/callback
+// - Prod:  https://saraatelier.studio/api/auth/google/callback
 export const GOOGLE_CALLBACK_URL = str(process.env.GOOGLE_CALLBACK_URL, "");
+
 // ===============================
 // Session / Cookies
 // ===============================
@@ -96,11 +103,10 @@ export const COOKIE_NAME = str(process.env.COOKIE_NAME, "oracle_sid");
 export const COOKIE_SECURE = str(process.env.COOKIE_SECURE, "false") === "true";
 
 // local: lax. prod cross-domain: none.
-export const COOKIE_SAMESITE = (str(process.env.COOKIE_SAMESITE, "lax") as
+export const COOKIE_SAMESITE = str(process.env.COOKIE_SAMESITE, "lax") as
   | "lax"
   | "strict"
-  | "none");
+  | "none";
 
-// opcional (normalmente solo prod)
+// opcional (útil si usas www y no-www)
 export const COOKIE_DOMAIN = str(process.env.COOKIE_DOMAIN, "");
-
