@@ -1,6 +1,7 @@
 // server/middleware/limits.ts
 import type { Request, Response, NextFunction } from "express";
 import path from "path";
+import fs from "fs";
 import {
   DATA_DIR,
   MAX_SESSIONS_PER_DAY,
@@ -29,11 +30,47 @@ type PersistShape = {
   current?: DayInfo;
 };
 
-const FILE = path.join(DATA_DIR, "limits.json");
-let store: PersistShape = readJsonFile(FILE, {});
+// ✅ Vercel solo permite escribir en /tmp
+function safeDataDir(): string {
+  const dir = String(DATA_DIR ?? "").trim();
+  if (!dir) return "/tmp/oracle-data";
+  if (dir === ".data" || dir.startsWith("./") || dir.startsWith("../")) {
+    return "/tmp/oracle-data";
+  }
+  return dir;
+}
+
+function ensureDir(dir: string) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (e: any) {
+    // No tiramos: en serverless degradamos a memoria
+    console.error("limits.ensureDir failed:", e?.message ?? e);
+  }
+}
+
+const DIR = safeDataDir();
+ensureDir(DIR);
+const FILE = path.join(DIR, "limits.json");
+
+// ✅ Store en memoria siempre existe
+let store: PersistShape = {};
+
+// ✅ Intentamos cargar desde disco, pero si falla no crasheamos
+try {
+  store = readJsonFile(FILE, {});
+} catch (e: any) {
+  console.error("limits.readJsonFile failed:", e?.message ?? e);
+  store = {};
+}
 
 function save() {
-  writeJsonFileAtomic(FILE, store);
+  try {
+    writeJsonFileAtomic(FILE, store);
+  } catch (e: any) {
+    // En Vercel si por lo que sea no puede escribir, seguimos en RAM
+    console.error("limits.writeJsonFileAtomic failed:", e?.message ?? e);
+  }
 }
 
 function getDayKey(d = new Date()) {
@@ -116,6 +153,7 @@ export function enforceSessionLimits(opts?: { requireSessionId?: boolean }) {
       const requestedMax = body.maxOutputTokens;
       const maxOutputTokens = clampInt(requestedMax, MAX_OUTPUT_TOKENS, 64, 2000);
       body.maxOutputTokens = maxOutputTokens;
+      (req as any).body = body;
 
       if (!sessionId) return next();
 
