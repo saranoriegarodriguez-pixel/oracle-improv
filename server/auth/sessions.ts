@@ -31,8 +31,13 @@ function cleanupSessions() {
 }
 
 function secret() {
-  // En prod: pon SESSION_SECRET sí o sí (larga y aleatoria)
-  return SESSION_SECRET || "dev-secret-change-me";
+  // ✅ En prod: pon SESSION_SECRET sí o sí (larga y aleatoria)
+  // ✅ En local: si falta, usamos fallback (pero avisamos)
+  if (!SESSION_SECRET) {
+    console.warn("SESSION_SECRET missing; using dev fallback secret");
+    return "dev-secret-change-me";
+  }
+  return SESSION_SECRET;
 }
 
 function signSid(sid: string) {
@@ -54,6 +59,7 @@ function parseSignedCookie(raw: string | undefined | null): string | null {
 }
 
 function cookieOpts() {
+  // ✅ Nota: SameSite="none" exige Secure=true en navegadores modernos.
   const base: any = {
     httpOnly: true,
     secure: COOKIE_SECURE,
