@@ -14,12 +14,18 @@ function str(value: string | undefined, fallback = ""): string {
   return s || fallback;
 }
 
+function oneOf<T extends string>(value: string, allowed: readonly T[], fallback: T): T {
+  const v = String(value ?? "").trim().toLowerCase();
+  return (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
+}
+
 // ===============================
 // Server
 // ===============================
 export const PORT = str(process.env.PORT, "3000");
 
 // ⚠️ En producción NO uses "*" si vas con cookies.
+// En Render (prod): "https://saraatelier.studio" (y opcional "https://www.saraatelier.studio")
 export const CORS_ORIGIN = str(process.env.CORS_ORIGIN, "http://localhost:5173");
 
 // ✅ Origen del frontend (donde vive tu web/app)
@@ -67,7 +73,8 @@ export const RATE_LIMIT_WINDOW_SEC = clamp(num(process.env.RATE_LIMIT_WINDOW_SEC
 // ===============================
 // Budget / storage
 // ===============================
-export const DATA_DIR = str(process.env.DATA_DIR, ".data");
+// ✅ Render (y también Vercel) soporta /tmp. En local puedes poner ".data" si quieres.
+export const DATA_DIR = str(process.env.DATA_DIR, "/tmp/oracle-data");
 
 export const MONTHLY_BUDGET_EUR = clamp(num(process.env.MONTHLY_BUDGET_EUR, 0), 0, 1_000_000);
 export const MONTHLY_CUTOFF_EUR = clamp(num(process.env.MONTHLY_CUTOFF_EUR, 0), 0, 1_000_000);
@@ -81,14 +88,13 @@ export const DEBUG_RAW = process.env.DEBUG_RAW === "1";
 // ===============================
 // Google OAuth
 // ===============================
-// ✅ Client ID/Secret de Google
+// ✅ Client ID/Secret de Google (del OAuth Client en Google Cloud)
 export const GOOGLE_CLIENT_ID = str(process.env.GOOGLE_CLIENT_ID, "");
 export const GOOGLE_CLIENT_SECRET = str(process.env.GOOGLE_CLIENT_SECRET, "");
 
-// ✅ Redirect URI registrado en Google Cloud (apunta al BACKEND)
-// Ejemplos:
-// - Local: http://localhost:3000/auth/google/callback
-// - Prod:  https://saraatelier.studio/api/auth/google/callback
+// ✅ Redirect URI registrado en Google Cloud (apunta SIEMPRE al BACKEND)
+// Local: http://localhost:3000/api/auth/google/callback
+// Prod : https://oracle-improv-api.onrender.com/api/auth/google/callback
 export const GOOGLE_CALLBACK_URL = str(process.env.GOOGLE_CALLBACK_URL, "");
 
 // ===============================
@@ -96,17 +102,18 @@ export const GOOGLE_CALLBACK_URL = str(process.env.GOOGLE_CALLBACK_URL, "");
 // ===============================
 export const SESSION_SECRET = str(process.env.SESSION_SECRET, "");
 
-// Nombre cookie (default seguro)
+// Nombre cookie
 export const COOKIE_NAME = str(process.env.COOKIE_NAME, "oracle_sid");
 
 // En local: false. En prod (https): true.
 export const COOKIE_SECURE = str(process.env.COOKIE_SECURE, "false") === "true";
 
 // local: lax. prod cross-domain: none.
-export const COOKIE_SAMESITE = str(process.env.COOKIE_SAMESITE, "lax") as
-  | "lax"
-  | "strict"
-  | "none";
+export const COOKIE_SAMESITE = oneOf(
+  str(process.env.COOKIE_SAMESITE, "lax"),
+  ["lax", "strict", "none"] as const,
+  "lax"
+);
 
 // opcional (útil si usas www y no-www)
 export const COOKIE_DOMAIN = str(process.env.COOKIE_DOMAIN, "");

@@ -1,5 +1,14 @@
+
 // src/pages/auth/Login.tsx
 import { useLocation } from "react-router-dom";
+
+function getApiBase(): string {
+  const envBase = String(import.meta.env.VITE_API_BASE_URL ?? "").trim();
+  if (envBase) return envBase.replace(/\/+$/, ""); // sin barra final
+
+  // fallback local (por si alguien arranca sin env)
+  return "http://localhost:3000";
+}
 
 export default function Login() {
   const loc = useLocation();
@@ -8,15 +17,18 @@ export default function Login() {
   const rawNext = params.get("next") ?? "/app";
   const frontendOrigin = window.location.origin;
 
-  const next =
-    rawNext.startsWith("http")
-      ? rawNext
-      : `${frontendOrigin}${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
+  // next siempre absoluto al FRONTEND
+  const next = rawNext.startsWith("http")
+    ? rawNext
+    : `${frontendOrigin}${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
 
   const onGoogleLogin = async () => {
-    const startPath = `/api/auth/google/start?next=${encodeURIComponent(next)}`;
+    const API = getApiBase();
 
-    const r = await fetch(startPath, {
+    // ✅ start en el BACKEND (Render)
+    const startUrl = `${API}/api/auth/google/start?next=${encodeURIComponent(next)}`;
+
+    const r = await fetch(startUrl, {
       method: "GET",
       credentials: "include",
     });
@@ -29,6 +41,7 @@ export default function Login() {
     const data = (await r.json()) as { url?: string };
     if (!data.url) throw new Error("Missing url from backend");
 
+    // redirige al login de Google
     window.location.href = data.url;
   };
 

@@ -60,10 +60,15 @@ function parseSignedCookie(raw: string | undefined | null): string | null {
 
 function cookieOpts() {
   // ✅ Nota: SameSite="none" exige Secure=true en navegadores modernos.
+  // Si alguien configura none + secure=false, lo “arreglamos” a secure=true.
+  const sameSite = COOKIE_SAMESITE;
+  const secure =
+    sameSite === "none" ? true : COOKIE_SECURE;
+
   const base: any = {
     httpOnly: true,
-    secure: COOKIE_SECURE,
-    sameSite: COOKIE_SAMESITE,
+    secure,
+    sameSite,
     path: "/",
     maxAge: SESSION_TTL_MS,
   };
@@ -105,9 +110,16 @@ export function clearSession(req: Request, res: Response) {
   const sid = parseSignedCookie(raw);
   if (sid) sessions.delete(sid);
 
-  // Para borrar bien, hay que usar las mismas opciones relevantes (path/domain)
-  const opts: any = { path: "/" };
-  if (COOKIE_DOMAIN) opts.domain = COOKIE_DOMAIN;
+  // ✅ Para borrar bien, usa mismas opciones relevantes que al setear
+  // (especialmente domain + secure + sameSite en algunos navegadores)
+  const setOpts = cookieOpts();
+
+  const opts: any = {
+    path: "/",
+    ...(setOpts.domain ? { domain: setOpts.domain } : {}),
+    secure: setOpts.secure,
+    sameSite: setOpts.sameSite,
+  };
 
   res.clearCookie(COOKIE_NAME, opts);
 }

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2023",
-    "lib": ["ES2023"],
+    "lib": ["ES2023"], 
     "module": "ESNext",
     "types": ["node"],
     "skipLibCheck": true,
@@ -26,5 +26,5 @@
       "@sharedData/*": ["shared/data/*"]
     }
   },
-  "include": ["vite.config.ts", "server", "shared"]
+  "include": ["vite.config.ts", "server", "shared", "api"]
 }

@@ -6,8 +6,8 @@ import crypto from "crypto";
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  GOOGLE_CALLBACK_URL, // ✅ backend callback (registrado en Google Cloud)
-  APP_ORIGIN,          // ✅ frontend origin (local/prod)
+  GOOGLE_CALLBACK_URL, // ✅ Redirect URI del BACKEND (registrada en Google Cloud)
+  APP_ORIGIN,          // ✅ Origin del FRONTEND (local/prod)
 } from "../env";
 
 import {
@@ -45,6 +45,23 @@ function consumeState(state: string): string | null {
   return v.next || null;
 }
 
+function safeNext(rawNext: string, appOrigin: string) {
+  const origin = String(appOrigin ?? "").trim().replace(/\/+$/, "");
+  const fallback = `${origin}/app`;
+
+  const v = String(rawNext ?? "").trim();
+  if (!v) return fallback;
+
+  // ✅ relativa => la convertimos a absoluta al frontend
+  if (v.startsWith("/")) return `${origin}${v}`;
+
+  // ✅ absoluta => solo permitimos si empieza por nuestro frontend
+  if (v.startsWith(origin)) return v;
+
+  // ❌ cualquier otra cosa => fallback
+  return fallback;
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, init);
   if (!r.ok) {
@@ -59,17 +76,17 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
  * (Este router se monta en /api desde app.ts)
  *
  * Devuelve la URL de Google para iniciar login.
- * Acepta ?next=/app/... o una URL absoluta.
+ * Acepta ?next=/app/... o una URL absoluta (solo si empieza por APP_ORIGIN).
  */
 googleAuthRouter.get("/auth/google/start", (req: Request, res: Response) => {
   cleanupStateStore();
 
-  const rawNext = String(req.query.next ?? "").trim();
+  if (!APP_ORIGIN) {
+    return res.status(500).json({ error: "Missing APP_ORIGIN in env" });
+  }
 
-  // ✅ next por defecto a la app
-  const next =
-    rawNext ||
-    `${APP_ORIGIN}/app`;
+  const rawNext = String(req.query.next ?? "");
+  const next = safeNext(rawNext, APP_ORIGIN);
 
   const state = crypto.randomBytes(16).toString("hex");
   stateStore.set(state, { ts: Date.now(), next });
