@@ -2,7 +2,7 @@
 import { Routes, Route } from "react-router-dom";
 import Topbar from "../components/Topbar";
 
-// Portfolio pages (ajusta si tus paths difieren)
+// Portfolio pages
 import Home from "../pages/portfolio/Home";
 import Work from "../pages/portfolio/Work";
 import About from "../pages/portfolio/About";
@@ -14,13 +14,15 @@ export default function PortfolioLayout() {
   return (
     <>
       <Topbar mode="portfolio" />
+
+      {/* ✅ Rutas internas del portfolio (relativas al layout) */}
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/work" element={<Work />} />
-        <Route path="/work/:slug" element={<ProjectPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/cv" element={<CV />} />
+        <Route index element={<Home />} />
+        <Route path="work" element={<Work />} />
+        <Route path="work/:slug" element={<ProjectPage />} />
+        <Route path="about" element={<About />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="cv" element={<CV />} />
       </Routes>
     </>
   );

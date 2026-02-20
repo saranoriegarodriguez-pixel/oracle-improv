@@ -1,22 +1,30 @@
+// src/pages/auth/Login.tsx
 import { useLocation } from "react-router-dom";
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || "";
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
+  "";
 
 export default function Login() {
   const loc = useLocation();
   const params = new URLSearchParams(loc.search);
 
+  // next puede venir como "/app", "/app/profile", etc.
   const rawNext = params.get("next") ?? "/app";
   const frontendOrigin = window.location.origin;
 
+  // ✅ normaliza next a URL absoluta del FRONTEND
   const next =
     rawNext.startsWith("http")
       ? rawNext
       : `${frontendOrigin}${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
 
   const onGoogleLogin = async () => {
-    if (!API_BASE) throw new Error("Missing VITE_API_BASE_URL in frontend env");
+    if (!API_BASE) {
+      throw new Error("Missing VITE_API_BASE_URL (frontend env).");
+    }
 
+    // ✅ IMPORTANTE: iniciar OAuth en el BACKEND (Render), no en el frontend
     const startUrl = `${API_BASE}/api/auth/google/start?next=${encodeURIComponent(
       next
     )}`;
@@ -34,6 +42,7 @@ export default function Login() {
     const data = (await r.json()) as { url?: string };
     if (!data.url) throw new Error("Missing url from backend");
 
+    // ✅ Redirigimos a Google
     window.location.href = data.url;
   };
 

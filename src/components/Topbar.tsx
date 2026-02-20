@@ -1,4 +1,5 @@
 // src/components/Topbar.tsx
+import { useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../state/authStore";
 import { useAppSettings } from "../state/appSettings";
@@ -16,6 +17,14 @@ export default function Topbar({ mode }: { mode: TopbarMode }) {
 
   const loc = useLocation();
   const nav = useNavigate();
+
+  // ✅ En portfolio queremos que detecte sesión al cargar (sin entrar a /app)
+  useEffect(() => {
+    if (auth.status === "unknown") {
+      void auth.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isAuthed = auth.status === "authed";
 

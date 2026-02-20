@@ -8,8 +8,6 @@ import Session from "./Session";
 import Profile from "./Profile";
 import Settings from "./Settings";
 
-import Login from "../auth/Login";
-
 function NotFound() {
   return (
     <div style={{ padding: 24 }}>
@@ -20,23 +18,32 @@ function NotFound() {
 }
 
 /**
- * OJO:
- * Este AppShell está pensado para montarse en App.tsx como:
- * <Route path="/app/*" element={<AppShell />} />
+ * AppShell está montado en App.tsx como:
+ * <Route path="/app/*" element={<AppLayout />} />
  *
+ * Y AppLayout renderiza <AppShell />.
  * Por eso aquí usamos rutas RELATIVAS: "scene", "session", etc.
  */
 export default function AppShell() {
   return (
     <FeedbackProvider>
       <Routes>
+        {/* ✅ /app */}
         <Route index element={<Home />} />
-        <Route path="scene" element={<Scene />} />
-        <Route path="session" element={<Session />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="login" element={<Login />} />
 
+        {/* ✅ /app/scene */}
+        <Route path="scene" element={<Scene />} />
+
+        {/* ✅ /app/session */}
+        <Route path="session" element={<Session />} />
+
+        {/* ✅ /app/profile */}
+        <Route path="profile" element={<Profile />} />
+
+        {/* ✅ /app/settings */}
+        <Route path="settings" element={<Settings />} />
+
+        {/* ✅ fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </FeedbackProvider>
