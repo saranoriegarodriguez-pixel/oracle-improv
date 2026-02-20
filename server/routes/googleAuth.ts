@@ -1,4 +1,3 @@
-// server/routes/googleAuth.ts
 import { Router } from "express";
 import type { Request, Response } from "express";
 import crypto from "crypto";
@@ -6,8 +5,8 @@ import crypto from "crypto";
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  GOOGLE_CALLBACK_URL, // ✅ Redirect URI del BACKEND (registrada en Google Cloud)
-  APP_ORIGIN,          // ✅ Origin del FRONTEND (local/prod)
+  GOOGLE_CALLBACK_URL,
+  APP_ORIGIN,
 } from "../env";
 
 import {
@@ -45,20 +44,22 @@ function consumeState(state: string): string | null {
   return v.next || null;
 }
 
-function safeNext(rawNext: string, appOrigin: string) {
-  const origin = String(appOrigin ?? "").trim().replace(/\/+$/, "");
-  const fallback = `${origin}/app`;
+function safeNext(rawNext: string): string {
+  // default a la app
+  const fallback = `${APP_ORIGIN}/app`;
+  const s = String(rawNext ?? "").trim();
+  if (!s) return fallback;
 
-  const v = String(rawNext ?? "").trim();
-  if (!v) return fallback;
+  // Si es relativa, la convertimos a absoluta en APP_ORIGIN
+  if (s.startsWith("/")) return `${APP_ORIGIN}${s}`;
 
-  // ✅ relativa => la convertimos a absoluta al frontend
-  if (v.startsWith("/")) return `${origin}${v}`;
+  // Si es absoluta, solo aceptamos si empieza por APP_ORIGIN
+  if (s.startsWith("http://") || s.startsWith("https://")) {
+    if (s.startsWith(APP_ORIGIN)) return s;
+    return fallback;
+  }
 
-  // ✅ absoluta => solo permitimos si empieza por nuestro frontend
-  if (v.startsWith(origin)) return v;
-
-  // ❌ cualquier otra cosa => fallback
+  // Cualquier otra cosa rara, fallback
   return fallback;
 }
 
@@ -73,34 +74,20 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 
 /**
  * GET /api/auth/google/start
- * (Este router se monta en /api desde app.ts)
- *
- * Devuelve la URL de Google para iniciar login.
- * Acepta ?next=/app/... o una URL absoluta (solo si empieza por APP_ORIGIN).
  */
 googleAuthRouter.get("/auth/google/start", (req: Request, res: Response) => {
   cleanupStateStore();
 
-  if (!APP_ORIGIN) {
-    return res.status(500).json({ error: "Missing APP_ORIGIN in env" });
-  }
-
-  const rawNext = String(req.query.next ?? "");
-  const next = safeNext(rawNext, APP_ORIGIN);
-
+  const next = safeNext(String(req.query.next ?? ""));
   const state = crypto.randomBytes(16).toString("hex");
   stateStore.set(state, { ts: Date.now(), next });
 
-  if (!GOOGLE_CLIENT_ID) {
-    return res.status(500).json({ error: "Missing GOOGLE_CLIENT_ID in env" });
-  }
-  if (!GOOGLE_CALLBACK_URL) {
-    return res.status(500).json({ error: "Missing GOOGLE_CALLBACK_URL in env" });
-  }
+  if (!GOOGLE_CLIENT_ID) return res.status(500).json({ error: "Missing GOOGLE_CLIENT_ID" });
+  if (!GOOGLE_CALLBACK_URL) return res.status(500).json({ error: "Missing GOOGLE_CALLBACK_URL" });
 
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
-    redirect_uri: GOOGLE_CALLBACK_URL, // ✅ Google vuelve aquí (backend)
+    redirect_uri: GOOGLE_CALLBACK_URL,
     response_type: "code",
     scope: "openid email profile",
     state,
@@ -114,14 +101,11 @@ googleAuthRouter.get("/auth/google/start", (req: Request, res: Response) => {
 
 /**
  * GET /api/auth/google/callback
- * Intercambia code -> tokens -> userinfo.
- * Crea cookie de sesión y redirige a next.
  */
 googleAuthRouter.get("/auth/google/callback", async (req: Request, res: Response) => {
   try {
     const code = String(req.query.code ?? "");
     const state = String(req.query.state ?? "");
-
     if (!code) return res.status(400).send("Missing code");
     if (!state) return res.status(400).send("Missing state");
 
@@ -132,7 +116,7 @@ googleAuthRouter.get("/auth/google/callback", async (req: Request, res: Response
       return res.status(500).send("Missing Google OAuth env vars");
     }
 
-    // 1) code -> token
+    // code -> token
     const tokenRes = await fetchJson<{
       access_token: string;
       expires_in?: number;
@@ -147,21 +131,21 @@ googleAuthRouter.get("/auth/google/callback", async (req: Request, res: Response
         code,
         client_id: GOOGLE_CLIENT_ID,
         client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_CALLBACK_URL, // ✅ el mismo
+        redirect_uri: GOOGLE_CALLBACK_URL,
         grant_type: "authorization_code",
       }).toString(),
     });
 
-    // 2) userinfo
+    // token -> userinfo
     const userInfo = await fetchJson<SessionUser>(
       "https://www.googleapis.com/oauth2/v2/userinfo",
       { headers: { Authorization: `Bearer ${tokenRes.access_token}` } }
     );
 
-    // 3) cookie session
+    // create cookie session
     createSession(res, userInfo);
 
-    // 4) redirect
+    // redirect to frontend
     return res.redirect(next);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
