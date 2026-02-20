@@ -5,9 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+
     "server": "tsx watch server/index.ts",
-    "start": "tsx server/index.ts",
+
     "build": "tsc -b && vite build",
+    "build:server": "tsc -p server/tsconfig.server.json",
+
+    "start": "node dist/server/server/index.js",
+
     "lint": "eslint .",
     "preview": "vite preview"
   },
