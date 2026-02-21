@@ -1,7 +1,8 @@
 // server/middleware/rateLimit.ts
 import type { Request, Response, NextFunction } from "express";
-import { RATE_LIMIT_MAX_REQ, RATE_LIMIT_WINDOW_SEC } from "../env";
-import { getOwnerKey } from "../utils/ownerKey";
+
+import { RATE_LIMIT_MAX_REQ, RATE_LIMIT_WINDOW_SEC } from "../env.js";
+import { getOwnerKey } from "../utils/ownerKey.js";
 
 type Bucket = { windowStartMs: number; count: number };
 const buckets = new Map<string, Bucket>();

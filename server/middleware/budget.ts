@@ -1,7 +1,8 @@
 // server/middleware/budget.ts
 import type { Request, Response, NextFunction } from "express";
-import { USD_PER_EUR } from "../env";
-import { getBudgetStatus } from "../store/budgetStore";
+
+import { USD_PER_EUR } from "../env.js";
+import { getBudgetStatus } from "../store/budgetStore.js";
 
 /**
  * Enforce monthly budget cutoff (EUR).

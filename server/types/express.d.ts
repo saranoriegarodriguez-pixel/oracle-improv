@@ -1,6 +1,6 @@
 // server/types/express.d.ts
 import "express";
-import type { SessionUser } from "../auth/sessions";
+import type { SessionUser } from "../auth/sessions.js";
 
 declare global {
   namespace Express {

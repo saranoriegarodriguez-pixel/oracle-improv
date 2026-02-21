@@ -1,9 +1,10 @@
 // server/evaluate.ts
 import type { Request, Response } from "express";
-import type { ProviderName, ChatMessage as ProviderChatMessage } from "./types";
-import { AI_PROVIDER } from "./env";
-import { chatWithOllama } from "./providers/ollama";
-import { chatWithOpenAI } from "./providers/openai";
+import type { ProviderName, ChatMessage as ProviderChatMessage } from "./types.js";
+
+import { AI_PROVIDER } from "./env.js";
+import { chatWithOllama } from "./providers/ollama.js";
+import { chatWithOpenAI } from "./providers/openai.js";
 
 /* =========================================================
    TIPOS (frontend espera estos campos)
