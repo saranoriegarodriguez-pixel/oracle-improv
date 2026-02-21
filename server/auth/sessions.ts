@@ -7,7 +7,7 @@ import {
   COOKIE_SECURE,
   COOKIE_SAMESITE,
   COOKIE_DOMAIN,
-} from "../env";
+} from "../env.js";
 
 /**
  * Sessions in memory (MVP)

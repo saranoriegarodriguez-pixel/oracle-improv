@@ -1,8 +1,7 @@
-// server/index.ts
 import "dotenv/config";
-import app from "./app";
-import { PORT } from "./env";
+import app from "./app.js";
+import { PORT } from "./env.js";
 
-app.listen(Number(PORT), "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+app.listen(Number(PORT), () => {
+  console.log(`🚀 Server running on :${PORT}`);
 });

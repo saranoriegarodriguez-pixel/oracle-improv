@@ -1,5 +1,5 @@
 // server/providers/openai.ts
-import type { ChatRequest, ChatResponse } from "../types";
+import type { ChatRequest, ChatResponse } from "../types.js";
 import {
   OPENAI_API_KEY,
   OPENAI_DEFAULT_MODEL,
@@ -8,9 +8,9 @@ import {
   MAX_TOKENS_SCENE,
   MAX_TOKENS_TRIAL,
   DEBUG_RAW,
-} from "../env";
+} from "../env.js";
 
-import { addUsdSpend } from "../store/budgetStore";
+import { addUsdSpend } from "../store/budgetStore.js";
 
 const ALLOWED_OPENAI_MODELS = new Set(["gpt-5-mini"]);
 

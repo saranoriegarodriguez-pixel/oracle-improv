@@ -7,15 +7,14 @@ import {
   GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL,
   APP_ORIGIN,
-} from "../env";
+} from "../env.js";
 
 import {
   createSession,
   getSessionUser,
   clearSession,
   type SessionUser,
-} from "../auth/sessions";
-
+} from "../auth/sessions.js";
 export const googleAuthRouter = Router();
 
 /**

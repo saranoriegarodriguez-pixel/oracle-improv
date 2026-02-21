@@ -1,7 +1,6 @@
-// server/routes/api.ts
 import { Router } from "express";
-import { evaluateHandler } from "../evaluate";
-import { characterPromptHandler } from "../characterPrompt";
+import { evaluateHandler } from "../evaluate.js";
+import { characterPromptHandler } from "../characterPrompt.js";
 
 export const apiRouter = Router();
 

@@ -2,14 +2,14 @@
 import { Router } from "express";
 import type { Request, Response, NextFunction } from "express";
 
-import type { ChatRequest, ProviderName } from "../types";
-import { AI_PROVIDER } from "../env";
+import type { ChatRequest, ProviderName } from "../types.js";
+import { AI_PROVIDER } from "../env.js";
 
-import { chatWithOllama } from "../providers/ollama";
-import { chatWithOpenAI } from "../providers/openai";
+import { chatWithOllama } from "../providers/ollama.js";
+import { chatWithOpenAI } from "../providers/openai.js";
 
 // ✅ sesión Google
-import { getSessionUser } from "../auth/sessions";
+import { getSessionUser } from "../auth/sessions.js";
 
 export const chatRouter = Router();
 

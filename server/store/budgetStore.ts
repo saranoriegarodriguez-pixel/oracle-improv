@@ -1,7 +1,7 @@
 // server/store/budgetStore.ts
 import path from "path";
-import { DATA_DIR, MONTHLY_BUDGET_EUR, MONTHLY_CUTOFF_EUR } from "../env";
-import { readJsonFile, writeJsonFileAtomic } from "./persist";
+import { DATA_DIR, MONTHLY_BUDGET_EUR, MONTHLY_CUTOFF_EUR } from "../env.js";
+import { readJsonFile, writeJsonFileAtomic } from "./persist.js";
 
 type OwnerKey = string; // user:sara | ip:...
 type MonthKey = string; // YYYY-MM
