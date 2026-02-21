@@ -1,14 +1,12 @@
+// src/state/authStore.ts
 import { create } from "zustand";
 import type { AuthStatus, AuthUser, AuthMeResponse } from "./authTypes";
 
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE_URL?.trim() ||
-  "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 type AuthState = {
   status: AuthStatus;
   user: AuthUser | null;
-
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -25,15 +23,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refresh: async () => {
     if (get().status === "loading") return;
-
     set({ status: "loading" });
+
     try {
       const data = await fetchMe();
-      if (data.ok) {
-        set({ status: "authed", user: data.user ?? null });
-      } else {
-        set({ status: "anon", user: null });
-      }
+      if (data.ok) set({ status: "authed", user: data.user ?? null });
+      else set({ status: "anon", user: null });
     } catch {
       set({ status: "anon", user: null });
     }

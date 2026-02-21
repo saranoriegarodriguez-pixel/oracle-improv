@@ -1,48 +1,27 @@
-// src/state/authStore.ts
-import { create } from "zustand";
-import type { AuthStatus, AuthUser, AuthMeResponse } from "../../state/authTypes";
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+// src/pages/auth/RequireAuth.tsx
+import { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "../../state/authStore";
 
-type AuthState = {
-  status: AuthStatus;
-  user: AuthUser | null;
-  refresh: () => Promise<void>;
-  logout: () => Promise<void>;
-};
+export default function RequireAuth({ children }: { children: React.ReactNode }) {
+  const auth = useAuthStore();
+  const loc = useLocation();
 
-async function fetchMe(): Promise<AuthMeResponse> {
-  const r = await fetch(`${API_BASE}/api/auth/me`, { credentials: "include" });
-  if (!r.ok) return { ok: false };
-  return (await r.json()) as AuthMeResponse;
+  useEffect(() => {
+    if (auth.status === "unknown") {
+      void auth.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (auth.status === "unknown" || auth.status === "loading") {
+    return <div style={{ padding: 20, opacity: 0.85 }}>Cargando sesión…</div>;
+  }
+
+  if (auth.status !== "authed") {
+    const next = loc.pathname + loc.search;
+    return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
+  }
+
+  return <>{children}</>;
 }
-
-export const useAuthStore = create<AuthState>((set, get) => ({
-  status: "unknown",
-  user: null,
-
-  refresh: async () => {
-    if (get().status === "loading") return;
-    set({ status: "loading" });
-
-    try {
-      const data = await fetchMe();
-      if (data.ok) set({ status: "authed", user: data.user ?? null });
-      else set({ status: "anon", user: null });
-    } catch {
-      set({ status: "anon", user: null });
-    }
-  },
-
-  logout: async () => {
-    try {
-      await fetch(`${API_BASE}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {
-      // ignore
-    } finally {
-      set({ status: "anon", user: null });
-    }
-  },
-}));
