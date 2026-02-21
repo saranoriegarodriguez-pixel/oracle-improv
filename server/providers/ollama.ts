@@ -1,6 +1,6 @@
 // server/providers/ollama.ts
-import type { ChatRequest, ChatResponse } from "../types";
-import { OLLAMA_BASE_URL, OLLAMA_DEFAULT_MODEL, OLLAMA_ORACLE_MODEL } from "../env";
+import type { ChatRequest, ChatResponse } from "../types.js";
+import { OLLAMA_BASE_URL, OLLAMA_DEFAULT_MODEL, OLLAMA_ORACLE_MODEL } from "../env.js";
 
 export async function chatWithOllama(
   req: ChatRequest & { oracle?: boolean }
