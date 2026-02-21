@@ -58,12 +58,23 @@ function parseSignedCookie(raw: string | undefined | null): string | null {
   return sid;
 }
 
+type SameSiteValue = "lax" | "strict" | "none";
+
+function normalizeSameSite(v: unknown): SameSiteValue {
+  const s = String(v ?? "").trim().toLowerCase();
+  if (s === "strict") return "strict";
+  if (s === "none") return "none";
+  return "lax"; // default seguro
+}
+
 function cookieOpts() {
-  // ✅ Nota: SameSite="none" exige Secure=true en navegadores modernos.
-  // Si alguien configura none + secure=false, lo “arreglamos” a secure=true.
-  const sameSite = COOKIE_SAMESITE;
-  const secure =
-    sameSite === "none" ? true : COOKIE_SECURE;
+  // ✅ Para proxy /api (first-party):
+  // - SameSite Lax es lo más estable (Brave-friendly)
+  // - Domain idealmente vacío (host-only saraatelier.studio)
+  const sameSite = normalizeSameSite(COOKIE_SAMESITE);
+
+  // ✅ SameSite="none" exige Secure=true sí o sí (navegadores modernos)
+  const secure = sameSite === "none" ? true : Boolean(COOKIE_SECURE);
 
   const base: any = {
     httpOnly: true,
@@ -73,7 +84,8 @@ function cookieOpts() {
     maxAge: SESSION_TTL_MS,
   };
 
-  // Domain solo si lo configuras (normalmente solo prod)
+  // ✅ Domain solo si lo configuras explícitamente.
+  // Recomendación proxy: NO poner COOKIE_DOMAIN (déjalo vacío).
   if (COOKIE_DOMAIN) base.domain = COOKIE_DOMAIN;
 
   return base;
@@ -111,7 +123,6 @@ export function clearSession(req: Request, res: Response) {
   if (sid) sessions.delete(sid);
 
   // ✅ Para borrar bien, usa mismas opciones relevantes que al setear
-  // (especialmente domain + secure + sameSite en algunos navegadores)
   const setOpts = cookieOpts();
 
   const opts: any = {

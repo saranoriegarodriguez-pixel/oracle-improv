@@ -2,31 +2,36 @@
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 
-const API_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ||
-  "https://oracle-improv-api.onrender.com";
+const RAW_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || "";
+
+// Si hay VITE_API_BASE_URL -> modo backend directo (Render)
+// Si no -> modo proxy (mismo dominio), usa rutas relativas /api/...
+const API_BASE = RAW_BASE ? RAW_BASE.replace(/\/$/, "") : "";
 
 export default function Login() {
   const loc = useLocation();
-  const params = new URLSearchParams(loc.search);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  // Puede venir como "/app", "/app/profile", etc.
+  const params = new URLSearchParams(loc.search);
+
+  // next puede venir como "/app", "/app/profile", etc.
   const rawNext = params.get("next") ?? "/app";
   const frontendOrigin = window.location.origin;
 
-  // Normalizamos next a URL absoluta del frontend
+  // normaliza next a URL absoluta del FRONTEND
   const next =
     rawNext.startsWith("http")
       ? rawNext
       : `${frontendOrigin}${rawNext.startsWith("/") ? "" : "/"}${rawNext}`;
 
   const onGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setErr(null);
+    setBusy(true);
 
+    try {
+      // ✅ start siempre en BACKEND… pero si hay proxy, lo llamamos en misma origin
       const startUrl = `${API_BASE}/api/auth/google/start?next=${encodeURIComponent(
         next
       )}`;
@@ -42,16 +47,14 @@ export default function Login() {
       }
 
       const data = (await r.json()) as { url?: string };
-      if (!data.url) {
-        throw new Error("Backend did not return OAuth URL.");
-      }
+      if (!data.url) throw new Error("Missing url from backend");
 
-      // Redirección real a Google
       window.location.href = data.url;
-    } catch (err) {
-      console.error(err);
-      setError("No se pudo iniciar sesión con Google.");
-      setLoading(false);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Error desconocido";
+      setErr(msg);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -62,28 +65,26 @@ export default function Login() {
 
       <button
         onClick={() => void onGoogleLogin()}
-        disabled={loading}
+        disabled={busy}
         style={{
           padding: "12px 16px",
           borderRadius: 12,
           border: "1px solid rgba(255,255,255,.18)",
-          background: loading
-            ? "rgba(255,255,255,.03)"
-            : "rgba(255,255,255,.06)",
+          background: "rgba(255,255,255,.06)",
           color: "inherit",
-          cursor: loading ? "not-allowed" : "pointer",
+          cursor: busy ? "not-allowed" : "pointer",
           width: "100%",
           fontSize: 16,
-          opacity: loading ? 0.6 : 1,
+          opacity: busy ? 0.7 : 1,
         }}
       >
-        {loading ? "Redirigiendo…" : "Entrar con Google"}
+        {busy ? "Abriendo Google…" : "Entrar con Google"}
       </button>
 
-      {error && (
-        <div style={{ marginTop: 16, color: "#ff6b6b", fontSize: 14 }}>
-          {error}
-        </div>
+      {err && (
+        <p style={{ marginTop: 12, color: "#ff6b6b", whiteSpace: "pre-wrap" }}>
+          {err}
+        </p>
       )}
     </div>
   );
