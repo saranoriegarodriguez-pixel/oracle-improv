@@ -2,7 +2,8 @@
 import { create } from "zustand";
 import type { AuthStatus, AuthUser, AuthMeResponse } from "./authTypes";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+// ✅ Con proxy: si no hay env, usa "" (same-origin)
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "";
 
 type AuthState = {
   status: AuthStatus;
@@ -40,8 +41,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         method: "POST",
         credentials: "include",
       });
-    } catch {
-      // ignore
     } finally {
       set({ status: "anon", user: null });
     }
