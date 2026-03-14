@@ -1,82 +1,133 @@
-// src/pages/portfolio/Home.tsx
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
 import { useAppSettings } from "../../state/appSettings";
+import NetflixRow, { type NetflixItem } from "../../components/portfolio/NetflixRow";
 
 export default function Home() {
   const { st } = useAppSettings();
-  const lang = st.lang; // "es" | "en"
+  const lang = (st.lang ?? "es") as "es" | "en";
 
-  // ✅ Imágenes en public (rutas absolutas)
-  const heroSlides = [
-    {
-      slug: "oraculo-improv",
-      img: "/media/portfolio/home/home_oracle_improv.png",
-      title: { es: "Oracle-Improv", en: "Oracle-Improv" },
-      tag: { es: "IA + impro + feedback", en: "AI + improv + feedback" },
-    },
-    {
-      slug: "cotilleos-del-olimpo",
-      img: "/media/portfolio/home/home_cotilleos.png",
-      title: { es: "Cotilleos del Olimpo", en: "Olympos Gossip" },
-      tag: { es: "Capítulo piloto", en: "Pilot episode" },
-    },
-    {
-      slug: "rv-monta-tu-teatro",
-      img: "/media/portfolio/home/home_rv.png",
-      title: { es: "RV: Monta tu Teatro", en: "VR: Build Your Theatre" },
-      tag: { es: "Unreal Engine 5", en: "Unreal Engine 5" },
-    },
-  ];
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const t =
     lang === "es"
       ? {
-          h1: "Portfolio",
-          sub: "Arte, tecnología y escena. Proyectos que se construyen como mundos.",
-          ctaWork: "Ver proyectos",
-          ctaApp: "Abrir la app",
+          heroTitle: "Universos creativos entre escena, IA y experiencia inmersiva",
+          heroText:
+            "Proyectos construidos como mundos: narrativa, dirección, sistemas interactivos y una estética oscura con pulso teatral.",
+          heroPrimary: "Ver Work",
+          heroSecondary: "Abrir app",
+          mainRow: "Proyectos principales",
+          secondRow: "Explorar universos",
         }
       : {
-          h1: "Portfolio",
-          sub: "Art, technology and stage. Projects built like worlds.",
-          ctaWork: "View work",
-          ctaApp: "Open the app",
+          heroTitle: "Creative worlds between stage, AI and immersive experience",
+          heroText:
+            "Projects built like worlds: narrative, direction, interactive systems and a dark theatrical pulse.",
+          heroPrimary: "View Work",
+          heroSecondary: "Open app",
+          mainRow: "Main projects",
+          secondRow: "Explore worlds",
         };
 
+  const mainItems: NetflixItem[] = [
+    {
+      slug: "oraculo-improv",
+      title: "Oracle-Improv",
+      subtitle:
+        lang === "es"
+          ? "Impro teatral con personajes y Oráculo evaluador"
+          : "Theatrical improv with characters and an evaluator Oracle",
+      image: "/media/portfolio/home/home_oracle_improv.png",
+      badge: "App",
+      cta: lang === "es" ? "Ver proyecto" : "View project",
+    },
+    {
+      slug: "cotilleos-del-olimpo",
+      title: lang === "es" ? "Cotilleos del Olimpo" : "Olympus Gossip",
+      subtitle:
+        lang === "es"
+          ? "Serie narrativa entre mito, ironía y deseo"
+          : "Narrative series between myth, irony and desire",
+      image: "/media/portfolio/home/home_cotilleos.png",
+      badge: lang === "es" ? "Serie" : "Series",
+      cta: lang === "es" ? "Ver proyecto" : "View project",
+    },
+    {
+      slug: "rv-monta-tu-teatro",
+      title: lang === "es" ? "RV · Monta tu Teatro" : "VR · Build Your Theatre",
+      subtitle:
+        lang === "es"
+          ? "Experiencia inmersiva para escena y espacio"
+          : "Immersive experience for stage and space",
+      image: "/media/portfolio/home/home_rv.png",
+      badge: "VR",
+      cta: lang === "es" ? "Ver proyecto" : "View project",
+    },
+  ];
+
+  const secondaryItems: NetflixItem[] = [
+    {
+      slug: "cotilleos-del-olimpo",
+      title: lang === "es" ? "Universo Olimpo" : "Olympus World",
+      subtitle:
+        lang === "es"
+          ? "Lore, tono visual y tensión narrativa"
+          : "Lore, visual tone and narrative tension",
+      image: "/media/portfolio/home/home_cotilleos.png",
+    },
+    {
+      slug: "oraculo-improv",
+      title: lang === "es" ? "Sistema Oráculo" : "Oracle System",
+      subtitle:
+        lang === "es"
+          ? "Evaluación, progreso y estructura"
+          : "Evaluation, progression and structure",
+      image: "/media/portfolio/home/home_oracle_improv.png",
+    },
+    {
+      slug: "rv-monta-tu-teatro",
+      title: lang === "es" ? "Escena inmersiva" : "Immersive staging",
+      subtitle:
+        lang === "es"
+          ? "Espacio, dirección y composición"
+          : "Space, direction and composition",
+      image: "/media/portfolio/home/home_rv.png",
+    },
+  ];
+
   return (
-    <main className="pHome">
-      <header className="pHome__hero">
-        <h1 className="pHome__title">{t.h1}</h1>
-        <p className="pHome__subtitle">{t.sub}</p>
-
-        <div className="pHome__ctaRow">
-          <Link className="pHome__btn pHome__btn--accent" to="/work">
-            {t.ctaWork}
-          </Link>
-          <Link className="pHome__btn pHome__btn--soft" to="/app">
-            {t.ctaApp}
-          </Link>
+    <main className="homePage">
+      <section className="homeHero">
+        <div className="homeHero__media">
+          <img
+            className="homeHero__img"
+            src="/media/portfolio/home/home_oracle_improv.png"
+            alt="Oracle-Improv"
+          />
+          <div className="homeHero__shade" />
         </div>
-      </header>
 
-      {/* ✅ Carrusel simple 16:9 (sin cortar imagen: object-fit: contain en CSS) */}
-      <section className="pHome__carousel" aria-label="Featured projects">
-        <div className="pCar">
-          {heroSlides.map((s) => (
-            <Link key={s.slug} to={`/work/${s.slug}`} className="pCar__slide">
-              <div className="pCar__frame" aria-hidden>
-                <img src={s.img} alt={s.title[lang]} loading="lazy" />
-              </div>
+        <div className="homeHero__content">
+          <h1 className="homeHero__title">{t.heroTitle}</h1>
+          <p className="homeHero__text">{t.heroText}</p>
 
-              <div className="pCar__cap">
-                <div className="pCar__name">{s.title[lang]}</div>
-                <div className="pCar__tag">{s.tag[lang]}</div>
-              </div>
+          <div className="homeHero__actions">
+            <Link className="homeBtn homeBtn--primary" to="/work">
+              {t.heroPrimary}
             </Link>
-          ))}
+            <Link className="homeBtn homeBtn--soft" to="/app">
+              {t.heroSecondary}
+            </Link>
+          </div>
         </div>
       </section>
+
+      <NetflixRow title={t.mainRow} items={mainItems} />
+      <NetflixRow title={t.secondRow} items={secondaryItems} />
     </main>
   );
 }

@@ -1,54 +1,118 @@
-// src/pages/portfolio/Work.tsx
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import "./Work.css";
-
 import { useAppSettings } from "../../state/appSettings";
-import { PROJECTS, type Project, type Lang } from "./projectsData";
-
-function pick<T extends Record<Lang, string>>(obj: T, lang: Lang) {
-  return obj[lang];
-}
+import NetflixRow, { type NetflixItem } from "../../components/portfolio/NetflixRow";
 
 export default function Work() {
   const { st } = useAppSettings();
-  const lang: Lang = st.lang === "en" ? "en" : "es";
+  const lang = (st.lang ?? "es") as "es" | "en";
 
-  const title = lang === "es" ? "Work" : "Work";
-  const subtitle =
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  const t =
     lang === "es"
-      ? "Proyectos, prototipos y mundos en construcción."
-      : "Projects, prototypes and worlds in progress.";
+      ? {
+          title: "Work",
+          subtitle: "Un catálogo visual de proyectos, universos y sistemas.",
+          row1: "Proyectos principales",
+          row2: "Narrativa y mundos",
+          row3: "IA, VR y experimentos",
+        }
+      : {
+          title: "Work",
+          subtitle: "A visual catalog of projects, worlds and systems.",
+          row1: "Main projects",
+          row2: "Narrative and worlds",
+          row3: "AI, VR and experiments",
+        };
 
-  const ariaLabel = lang === "es" ? "Proyectos" : "Projects";
+  const projectsRow: NetflixItem[] = [
+    {
+      slug: "oraculo-improv",
+      title: "Oracle-Improv",
+      subtitle:
+        lang === "es"
+          ? "App para impro teatral con feedback"
+          : "App for theatrical improv with feedback",
+      image: "/media/portfolio/work/work-oraculo.png",
+      badge: "App",
+    },
+    {
+      slug: "cotilleos-del-olimpo",
+      title: lang === "es" ? "Cotilleos del Olimpo" : "Olympus Gossip",
+      subtitle:
+        lang === "es"
+          ? "Serie visual y narrativa"
+          : "Visual and narrative series",
+      image: "/media/portfolio/work/work-cotilleos.png",
+      badge: lang === "es" ? "Serie" : "Series",
+    },
+    {
+      slug: "rv-monta-tu-teatro",
+      title: lang === "es" ? "RV · Monta tu Teatro" : "VR · Build Your Theatre",
+      subtitle:
+        lang === "es"
+          ? "Dirección y espacio inmersivo"
+          : "Direction and immersive space",
+      image: "/media/portfolio/work/work-rv.png",
+      badge: "VR",
+    },
+  ];
+
+  const narrativeRow: NetflixItem[] = [
+    {
+      slug: "cotilleos-del-olimpo",
+      title: lang === "es" ? "Olimpo" : "Olympus",
+      subtitle:
+        lang === "es"
+          ? "Mito, ironía y deseo"
+          : "Myth, irony and desire",
+      image: "/media/portfolio/work/work-cotilleos.png",
+    },
+    {
+      slug: "oraculo-improv",
+      title: lang === "es" ? "Oráculo" : "Oracle",
+      subtitle:
+        lang === "es"
+          ? "Sistema, ritual y evaluación"
+          : "System, ritual and evaluation",
+      image: "/media/portfolio/work/work-oraculo.png",
+    },
+  ];
+
+  const experimentsRow: NetflixItem[] = [
+    {
+      slug: "rv-monta-tu-teatro",
+      title: "VR Theatre",
+      subtitle:
+        lang === "es"
+          ? "Espacio, escena y prototipo"
+          : "Space, staging and prototype",
+      image: "/media/portfolio/work/work-rv.png",
+    },
+    {
+      slug: "oraculo-improv",
+      title: lang === "es" ? "IA conversacional" : "Conversational AI",
+      subtitle:
+        lang === "es"
+          ? "Personajes y feedback"
+          : "Characters and feedback",
+      image: "/media/portfolio/work/work-oraculo.png",
+    },
+  ];
 
   return (
-    <main className="work">
-      <header className="work__hero">
-        <h1 className="work__title">{title}</h1>
-        <p className="work__subtitle">{subtitle}</p>
+    <main className="workPage">
+      <header className="workPage__hero">
+        <h1 className="workPage__title">{t.title}</h1>
+        <p className="workPage__subtitle">{t.subtitle}</p>
       </header>
 
-      <section className="work__grid" aria-label={ariaLabel}>
-        {PROJECTS.map((p: Project) => (
-          <Link key={p.slug} to={`/work/${p.slug}`} className="workCard">
-            <div className="workCard__imgWrap">
-              {/* Importante: no cortar la imagen */}
-              <img
-                className="workCard__img"
-                src={p.cover}
-                alt={pick(p.title, lang)}
-                loading="lazy"
-              />
-            </div>
-
-            <div className="workCard__body">
-              <h2 className="workCard__title">{pick(p.title, lang)}</h2>
-              <p className="workCard__tagline">{pick(p.tagline, lang)}</p>
-            </div>
-          </Link>
-        ))}
-      </section>
+      <NetflixRow title={t.row1} items={projectsRow} />
+      <NetflixRow title={t.row2} items={narrativeRow} />
+      <NetflixRow title={t.row3} items={experimentsRow} />
     </main>
   );
 }
-
