@@ -1,0 +1,138 @@
+.nfRow {
+  margin-top: 28px;
+}
+
+.nfRow__title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+
+.nfRow__track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 6px 4px 16px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.nfRow__track::-webkit-scrollbar {
+  height: 10px;
+}
+
+.nfRow__track::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
+.nfCard {
+  position: relative;
+  flex: 0 0 300px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: var(--shadow);
+  transform: scale(1);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.nfCard:hover {
+  transform: scale(1.08);
+  z-index: 8;
+  border-color: rgba(255, 61, 166, 0.35);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+}
+
+.nfCard__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.nfCard__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+}
+
+.nfCard__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(7, 6, 11, 0.92), rgba(7, 6, 11, 0.08)),
+    radial-gradient(circle at 20% 18%, rgba(255, 61, 166, 0.12), transparent 45%),
+    radial-gradient(circle at 78% 75%, rgba(240, 213, 138, 0.10), transparent 45%);
+}
+
+.nfCard__hover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  transform: translateY(18px);
+  opacity: 0;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.nfCard:hover .nfCard__hover {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.nfCard__badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.nfCard__title {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text);
+}
+
+.nfCard__subtitle {
+  margin: 0;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.nfCard__cta {
+  display: inline-flex;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 61, 166, 0.14);
+  border: 1px solid rgba(255, 61, 166, 0.32);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .nfCard {
+    flex-basis: 260px;
+  }
+}

@@ -1,172 +1,79 @@
-.pc {
-  display: grid;
-  grid-template-columns: 1fr 0.92fr;
-  gap: 14px;
-  align-items: start;
-  position: relative;
-  z-index: 0; /* evita tapar la topbar */
+.pcRow {
+  margin-bottom: 40px;
 }
 
-.pc__rail {
-  display: grid;
-  gap: 12px;
-}
-
-/* Card */
-.pcCard {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-  background: rgba(7, 6, 11, 0.52);
-  text-decoration: none;
+.pcTitle {
+  font-size: 22px;
+  margin-bottom: 12px;
   color: var(--text);
-  box-shadow: 0 18px 60px rgba(0,0,0,.35);
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  min-height: 132px;
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.pcWrapper {
+  position: relative;
+}
+
+.pcTrack {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 40px;
+}
+
+.pcTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.pcCard {
+  position: relative;
+  min-width: 260px;
+  height: 150px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
 }
 
 .pcCard:hover {
-  transform: translateY(-2px);
-  background: rgba(255,255,255,0.05);
+  transform: scale(1.08);
+  z-index: 5;
 }
 
-.pcCard.is-active {
-  border-color: rgba(255, 61, 166, 0.22);
-  background: rgba(255, 61, 166, 0.08);
-}
-
-.pcCard__media {
-  position: relative;
-  height: 100%;
-  background: rgba(255,255,255,0.03);
-}
-
-.pcCard__media img,
-.pcCard__media video {
+.pcImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  filter: saturate(1.06) contrast(1.03);
 }
 
-/* overlay decorativo: NO roba clicks */
-.pcCard__veil {
+.pcOverlay {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 30% 25%, rgba(255,61,166,0.18), transparent 55%),
-    radial-gradient(circle at 70% 80%, rgba(240,213,138,0.14), transparent 55%);
-  opacity: 0.9;
-  pointer-events: none;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  color: white;
+  font-size: 14px;
 }
 
-.pcCard__body {
-  padding: 12px;
-  display: grid;
-  gap: 8px;
-}
-
-.pcCard__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.pcCard__title {
-  font-weight: 950;
-  letter-spacing: -0.2px;
-}
-
-.pcCard__tagline {
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.pcCard__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pcCard__cta {
-  margin-top: 2px;
-}
-
-/* Preview */
-.pc__preview {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 14px;
-  background: rgba(7, 6, 11, 0.52);
-  box-shadow: var(--shadow);
-  position: sticky;
-  top: 76px;
-}
-
-.pcPrev {
-  display: grid;
-  gap: 12px;
-}
-
-.pcPrev__media {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10; /* más alto que 16/9 para lucir covers verticales */
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.03);
-}
-
-.pcPrev__media img,
-.pcPrev__media video {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover; /* si quieres ver todo: cambia a contain */
-  filter: saturate(1.06) contrast(1.03);
-}
-
-.pcPrev__veil {
+.pcArrow {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 30% 25%, rgba(255,61,166,0.16), transparent 55%),
-    radial-gradient(circle at 70% 80%, rgba(240,213,138,0.12), transparent 55%);
-  pointer-events: none;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 28px;
+  width: 40px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 10;
 }
 
-.pcPrev__kicker {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
+.pcArrow--left {
+  left: 0;
 }
 
-.pcPrev__title {
-  margin: 0;
-  font-size: 26px;
-  letter-spacing: -0.6px;
-  line-height: 1.06;
-}
-
-.pcPrev__text {
-  margin: 0;
-  color: var(--text2);
-}
-
-.pcPrev__actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 980px) {
-  .pc { grid-template-columns: 1fr; }
-  .pc__preview { position: relative; top: 0; }
-  .pcCard { grid-template-columns: 140px 1fr; }
-  .pcPrev__media { aspect-ratio: 16 / 9; }
+.pcArrow--right {
+  right: 0;
 }
